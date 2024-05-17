@@ -1,0 +1,622 @@
+---
+title: "Joining subway stations and census block groups"
+author: "Henry Kanengiser"
+date: "2022-12-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidycensus)
+library(janitor)
+library(sf)
+
+# DIRECTORY
+wd <- getwd()
+dir_stations <- paste0(wd, "/Subway_Stations")
+
+# FILES
+stations <- "geo_export_6c36e3cf-edf5-4f81-a868-8bc8e9a95da4.shp"
+
+```
+
+The **purpose** of this program is to link ACS median HH income to NYC subway stations. The goal is to produce a dataset showing the income and demographics of people living near each subway line in NYC.
+
+# Read in subway station data
+```{r}
+
+stats <- st_read(file.path(dir_stations, stations))
+
+glimpse(stats)
+```
+
+## Create flags for each subway line
+
+The data from the MTA includes information at the station level but doesn't identify individual lines. Create a loop to create these flags for each train in the system
+
+```{r}
+
+## Need to drop "Express" and "-" from the line var and then flag the presence of every character that remains
+stats2 <- stats %>%
+  mutate(lineclean = gsub("Express|-| ", "", line)) %>%
+  # transform from mercator to scalar project
+  st_transform(crs = st_crs(2263)) %>%
+  # rename objectid to something meaning
+  rename(stationid = objectid)
+
+# stats2 %>%
+#   st_drop_geometry() %>%
+#   count(line, lineclean)
+
+## Check that CRS is listed as Long Island
+# stats2 %>% st_crs()
+        
+```    
+
+
+```{r}
+
+lines <- c("1", "2", "3", "4", "5", "6", "7", "A", "B", "C", "D", "E", "F", "G", "S", "J", "L", "M", "N", "Q", "R", "W", "Z")
+
+stats3 <- lines %>%
+  map(~ stats2 %>%
+        st_drop_geometry() %>%
+        mutate(.x = as.numeric(grepl(.x, lineclean, ignore.case=TRUE))) %>%
+        select(.x) %>%
+        set_names(paste0("flag", .x))) %>%
+  bind_cols(stats2, .)
+
+## Check creation of flag vars
+## Commented out for now but uncomment to check next time
+# stats3 %>%
+#   st_drop_geometry() %>%
+#   select(line, lineclean, starts_with("flag")) %>%
+#   slice_sample(n=10)
+
+```
+
+
+How many stations are there for each line, does it seem legit?
+```{r}
+
+stats3 %>%
+  st_drop_geometry() %>%
+  select(starts_with("flag")) %>%
+  summarise_all(sum) %>%
+  pivot_longer(cols = everything(), names_to = "train", values_to = "nstations") %>%
+  mutate(train = substr(train, nchar(train), nchar(train))) %>%
+  arrange(desc(nstations))
+
+```
+
+## Create buffer for each station
+
+We will identify all census tracts that fall within a 0.5 mile buffer of each subway station. Use the sf package to create a shape geometry for each subway station
+
+```{r}
+
+## dis (distance) units are meter
+## 0.5 miles = 804.672 meters
+
+statbuff <- stats3 %>%
+  st_buffer(dis = 804.672) 
+
+```
+
+Do a check on the buffer by running st_intersection. Every station by objectid should fall within the buffer for the same objectid.
+
+```{r}
+
+statbuff_test <- statbuff %>%
+  select(buffid = stationid, name, geometry)
+
+stats3_test <- stats3 %>%
+  select(statid = stationid, geometry)
+
+bufftest <- statbuff_test %>% 
+  st_intersection(stats3_test) %>%
+  mutate(idmatch = ifelse(buffid == statid, 1, 0))
+
+## Should be as many id matches as there are stations. The rest are nearby stations
+nrow(statbuff)
+bufftest %>%
+  st_drop_geometry() %>%
+  count(idmatch)
+
+## success!
+
+```
+
+
+# Read in census data
+
+Variable codes from the ACS data:
+
+-   B01001_001 | Total population
+-   B19001_001 | Number of households
+-   B19013_001 | Median household income
+
+Read in two time periods of ACS data
+
+-   2017-2021 (recent)
+-   2012-2016 (longer ago)
+
+## 2017-2021 5-year estimates
+
+```{r}
+
+# acsvars <- load_variables(2020, dataset = "acs5")
+
+bg21 <- get_acs(
+  geography = "block group",
+  variables = c(
+    pop  = "B01001_001",
+    nhh  = "B19001_001",
+    mhhi = "B19013_001"),
+  state = "New York",
+  geometry = TRUE,
+  year = 2021
+) %>%
+  clean_names() %>%
+  filter(grepl("Bronx|Kings|New York County|Queens|Richmond", name)) %>%
+  mutate(moerate = moe/estimate) %>%
+  pivot_wider(id_cols = c("geoid", "name", "geometry"),
+              names_from = "variable",
+              names_glue = "{variable}{.value}",
+              values_from = c("estimate", "moe", "moerate")) %>%
+  mutate(borough = case_when(
+    grepl("New York County", name) ~ "New York",
+    grepl("Bronx", name) ~ "Bronx",
+    grepl("Kings", name) ~ "Kings",
+    grepl("Queens", name) ~ "Queens",
+    grepl("Richmond", name) ~ "Richmond",))
+
+glimpse(bg21)
+
+bg21 %>%
+  st_drop_geometry() %>%
+  count(borough)
+
+## Gut check of the values for number of households & median household income
+bg21 %>%
+  st_drop_geometry() %>%
+  group_by(borough) %>%
+  summarise(pop = sum(popestimate, na.rm = TRUE),
+            nhh = sum(nhhestimate, na.rm = TRUE),
+            mhhi = weighted.mean(mhhiestimate, nhhestimate, na.rm = TRUE)) %>%
+  adorn_totals("row")
+```
+
+```{r}
+## Save permanent version of the 2017-21 block group shapefile
+st_write(bg21, dsn = file.path(wd, "dat/acs17t21", "acs_bg_17t21.shp"), delete_dsn = TRUE)
+
+```
+
+## 2012-2016 5-year estimates
+
+```{r}
+
+# acsvars <- load_variables(2020, dataset = "acs5")
+
+bg16 <- get_acs(
+  geography = "block group",
+  variables = c(
+    pop  = "B01001_001",
+    nhh  = "B19001_001",
+    mhhi = "B19013_001"),
+  state = "New York",
+  geometry = TRUE,
+  year = 2016
+) %>%
+  clean_names() %>%
+  filter(grepl("Bronx|Kings|New York County|Queens|Richmond", name)) %>%
+  mutate(moerate = moe/estimate) %>%
+  pivot_wider(id_cols = c("geoid", "name", "geometry"),
+              names_from = "variable",
+              names_glue = "{variable}{.value}",
+              values_from = c("estimate", "moe", "moerate")) %>%
+  mutate(borough = case_when(
+    grepl("New York County", name) ~ "New York",
+    grepl("Bronx", name) ~ "Bronx",
+    grepl("Kings", name) ~ "Kings",
+    grepl("Queens", name) ~ "Queens",
+    grepl("Richmond", name) ~ "Richmond",))
+
+glimpse(bg16)
+
+bg16 %>%
+  st_drop_geometry() %>%
+  count(borough)
+
+## Gut check of the values for number of households & median household income
+bg16 %>%
+  st_drop_geometry() %>%
+  group_by(borough) %>%
+  summarise(pop = sum(popestimate, na.rm = TRUE),
+            nhh = sum(nhhestimate, na.rm = TRUE),
+            mhhi = weighted.mean(mhhiestimate, nhhestimate, na.rm = TRUE)) %>%
+  adorn_totals("row")
+```
+
+```{r}
+## Save permanent version of the 2017-21 block group shapefile
+st_write(bg16, dsn = file.path(wd, "dat/acs12t16", "acs_bg_12t16.shp"), delete_dsn = TRUE)
+
+```
+
+## Read in permanent shapefiles 
+This is done in lieu of accessing the Census API
+
+```{r}
+### WRITE CODE TO READ IN THESE TWO FILES
+```
+
+
+Simplify the census bg data to just the important values & transform it to the same CRS as the subway stations file.
+
+```{r}
+
+bg21_2 <- bg21 %>%
+  select(geoid, pop = popestimate, nhh = nhhestimate, mhhi = mhhiestimate, geometry) %>%
+  st_transform(crs = st_crs(2263))
+
+glimpse(bg21_2)
+
+
+bg16_2 <- bg16 %>%
+  select(geoid, pop = popestimate, nhh = nhhestimate, mhhi = mhhiestimate, geometry) %>%
+  st_transform(crs = st_crs(2263))
+
+glimpse(bg16_2)
+
+```
+
+## Replace polygon with centroid point 
+
+For this analysis, we will look at the census bgs with their centroid within the 0.5 mile buffer of the subway station
+
+```{r}
+
+bg21_c <- st_centroid(bg21_2)
+bg16_c <- st_centroid(bg16_2)
+
+# plot(bg21_c)
+# plot(bg16_c)
+
+```
+
+
+
+# Do a spatial join with the subway stations and the block groups
+
+We will identify a subway station with the right Census data using the two following spatial joins
+-   subway stations (buffered 0.5 miles) & census block group centroids
+-   subway stations (point) & census block group polygon
+
+Then, combine these two merges and de-duplicate
+
+Do this for the 2017-21 Census data and then repeat for the 2012-16 data
+
+### join with census block centroids
+
+```{r}
+
+statbuffbg21 <- statbuff %>%
+  st_intersection(bg21_c)
+
+statbuffbg16 <- statbuff %>%
+  st_intersection(bg16_c)
+
+```
+
+Run a few checks on the intersection to make sure it looks right
+
+bg21 checks:
+
+```{r}
+## How many stations are in the file?
+statbuffbg21 %>%
+  st_drop_geometry() %>%
+  distinct(stationid) %>%
+  nrow()
+
+### which stations aren't in the file anymore?
+intersected <- statbuffbg21 %>%
+  st_drop_geometry() %>%
+  distinct(stationid) %>%
+  pull(stationid)
+
+stats3 %>%
+  st_drop_geometry() %>%
+  filter(!stationid %in% intersected)
+
+## How many census bgs are in the file?
+statbuffbg21 %>%
+  st_drop_geometry() %>%
+  distinct(geoid) %>%
+  nrow()
+
+glimpse(statbuffbg21)
+
+# How many bgs are within each stationid? Shouldn't be too many
+statbuffbg21 %>%
+  st_drop_geometry() %>%
+  count(stationid) %>%
+  count(n, name = "nbgs")
+
+```
+
+bg16 checks:
+
+```{r}
+## How many stations are in the file?
+statbuffbg16 %>%
+  st_drop_geometry() %>%
+  distinct(stationid) %>%
+  nrow()
+
+### which stations aren't in the file anymore?
+intersected <- statbuffbg16 %>%
+  st_drop_geometry() %>%
+  distinct(stationid) %>%
+  pull(stationid)
+
+stats3 %>%
+  st_drop_geometry() %>%
+  filter(!stationid %in% intersected)
+
+## How many census bgs are in the file?
+statbuffbg16 %>%
+  st_drop_geometry() %>%
+  distinct(geoid) %>%
+  nrow()
+
+glimpse(statbuffbg16)
+
+# How many bgs are within each stationid? Shouldn't be too many
+statbuffbg16 %>%
+  st_drop_geometry() %>%
+  count(stationid) %>%
+  count(n, name = "nbgs")
+
+```
+
+### join with census block group polygons
+
+```{r}
+
+statpointbg21 <- stats3 %>%
+  st_intersection(bg21_2)
+
+statpointbg16 <- stats3 %>%
+  st_intersection(bg16_2)
+
+```
+
+
+# Analysis
+
+```{r}
+
+## Create non-spatial version of the intersected file for descriptive analysis
+### deduplicate so rows matched in both files
+
+## 2017-21 file
+stat_an21 <- bind_rows(
+  st_drop_geometry(statbuffbg21),
+  st_drop_geometry(statpointbg21)
+) %>%
+  distinct() %>%
+  rename(pop21 = pop,
+         nhh21 = nhh,
+         mhhi21 = mhhi)
+
+## 2012-16 file
+stat_an16 <- bind_rows(
+  st_drop_geometry(statbuffbg16),
+  st_drop_geometry(statpointbg16)
+) %>%
+  distinct() %>%
+  rename(pop16 = pop,
+         nhh16 = nhh,
+         mhhi16 = mhhi)
+
+
+slice_sample(stat_an21, n = 6)
+
+```
+
+### Summarize to the station level
+
+```{r}
+
+stat_sum21 <- stat_an21 %>%
+  group_by(stationid, name) %>%
+  summarise(pop21 = sum(pop21, na.rm = TRUE),
+            mhhi21 = weighted.mean(mhhi21, nhh21, na.rm = TRUE),
+            nhh21 = sum(nhh21, na.rm = TRUE),
+            .groups = "keep") %>%
+  ungroup()
+
+stat_sum16 <- stat_an16 %>%
+  group_by(stationid) %>%
+  summarise(pop16 = sum(pop16, na.rm = TRUE),
+            mhhi16 = weighted.mean(mhhi16, nhh16, na.rm = TRUE),
+            nhh16 = sum(nhh16, na.rm = TRUE),
+            .groups = "keep") %>%
+  ungroup()
+
+
+## Check on merge using name var from both files
+station_summary <- full_join(stat_sum21, stat_sum16, by = "stationid") %>%
+  full_join(select(stats3,
+                   stationid, starts_with("flag"), geometry),
+            by = "stationid") %>%
+  # convert to spatial & assign it the same projection as stats3
+  st_as_sf(crs = st_crs(2263))
+
+# full_join(stat_sum21, stat_sum16, by = "stationid") %>%
+#   mutate(mismatch = ifelse(name.x != name.y, 1, 0)) %>%
+#   count(mismatch)
+
+
+```
+
+
+
+Questions
+-   How many people live within bgs along each train line?
+-   How many households live within bgs along each train line?
+-   What is the weighted mean of bg median household income along each train line?
+
+### Total # of people along each train line
+```{r}
+
+flagvars <- stat_an21 %>%
+  select(starts_with("flag")) %>%
+  names()
+
+pop0 <- data.frame(pop_tot = c(0), var = c("test"))
+
+pop21 <- flagvars %>%
+  map(~ stat_an21 %>%
+        filter(eval(as.name(paste(.x))) == 1) %>%
+        summarise(pop_tot = sum(pop21, na.rm = TRUE)) %>%
+        cbind(var = paste(.x))) %>%
+  bind_rows(pop0, .) %>%
+  filter(var != "test") %>%
+  select(var, pop_tot21 = pop_tot)
+
+pop16 <- flagvars %>%
+  map(~ stat_an16 %>%
+        filter(eval(as.name(paste(.x))) == 1) %>%
+        summarise(pop_tot = sum(pop16, na.rm = TRUE)) %>%
+        cbind(var = paste(.x))) %>%
+  bind_rows(pop0, .) %>%
+  filter(var != "test") %>%
+  select(var, pop_tot16 = pop_tot)
+
+pop21
+pop16
+
+```
+
+
+
+### Total # of households along each train line
+```{r analysis hhs}
+
+## Reference code for mapping
+# stat_an %>%
+#   filter(flag1 == 1) %>%
+#   summarise(num_hh = sum(nhh)) %>%
+#   cbind(var = "flag1")
+
+numhh0 <- data.frame(num_hh = c(0), var = c("test"))
+
+numhh21 <- flagvars %>%
+  map(~ stat_an21 %>%
+        filter(eval(as.name(paste(.x))) == 1) %>%
+        summarise(num_hh = sum(nhh21)) %>%
+        cbind(var = paste(.x))) %>%
+  bind_rows(numhh0, .) %>%
+  filter(var != "test") %>%
+  select(var, num_hh21 = num_hh)
+
+numhh16 <- flagvars %>%
+  map(~ stat_an16 %>%
+        filter(eval(as.name(paste(.x))) == 1) %>%
+        summarise(num_hh = sum(nhh16)) %>%
+        cbind(var = paste(.x))) %>%
+  bind_rows(numhh0, .) %>%
+  filter(var != "test") %>%
+  select(var, num_hh16 = num_hh)
+
+numhh21
+numhh16
+
+```
+
+### Weighted mean of median hh income along each train line
+
+```{r analysis mhhi}
+
+# use same flagvars as above
+
+mhhinc0 <- data.frame(mhhi = c(0), var = c("test"))
+
+mhhinc21 <- flagvars %>%
+  map(~ stat_an21 %>%
+        filter(eval(as.name(paste(.x))) == 1) %>%
+        summarise(mhhi = weighted.mean(mhhi21, nhh21, na.rm = TRUE)) %>%
+        cbind(var = paste(.x))) %>%
+  bind_rows(mhhinc0, .) %>%
+  filter(var != "test") %>%
+  select(var, mhhi21 = mhhi)
+
+mhhinc16 <- flagvars %>%
+  map(~ stat_an16 %>%
+        filter(eval(as.name(paste(.x))) == 1) %>%
+        summarise(mhhi = weighted.mean(mhhi16, nhh16, na.rm = TRUE)) %>%
+        cbind(var = paste(.x))) %>%
+  bind_rows(mhhinc0, .) %>%
+  filter(var != "test") %>%
+  select(var, mhhi16 = mhhi)
+
+mhhinc21
+mhhinc16
+
+```
+
+### join together to create a unified analysis file
+
+```{r}
+
+sum21 <- full_join(
+  full_join(pop21, numhh21, by = "var"), 
+  mhhinc21, 
+  by = "var")
+
+sum16 <- full_join(
+  full_join(pop16, numhh16, by = "var"), 
+  mhhinc16, 
+  by = "var")
+
+summary <- full_join(sum21, sum16, by = "var") %>%
+  mutate(var = substr(var, nchar(var), nchar(var))) %>%
+  rename(line = var)
+
+```
+
+## Look at change in income along each train line
+
+```{r}
+
+summary %>%
+  mutate(change_mhhi = mhhi21 - mhhi16) %>%
+  select(line, change_mhhi, mhhi21, mhhi16) %>%
+  arrange(desc(change_mhhi))
+  
+  
+```
+
+
+
+
+# Save permanent file
+
+```{r}
+
+## Commented out until we want to override these variables
+
+# write_csv(summary, file = file.path(wd, "/csv/trainlineincome.csv"))
+
+# st_write(station_summary, 
+#          dsn = file.path(wd, "dat/station_summary/station_summary.shp"),
+#          delete_dsn = TRUE)
+
+```
+

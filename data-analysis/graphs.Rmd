@@ -1,0 +1,166 @@
+---
+title: "Graphs and Maps for MTA Income"
+author: "Henry Kanengiser"
+date: "2023-01-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(sf)
+library(ggplot2)
+
+# DIRECTORY
+wd <- getwd()
+csv <- paste0(wd, "/csv")
+dss <- paste0(wd, "/dat/station_summary")
+dln <- paste0(wd, "/Subway_Lines")
+dbo <- paste0(wd, "/dat/nyboroughs_22b")
+
+# FILE
+fil_sum <- "trainlineincome.csv"
+fil_statsum <- "station_summary.shp"
+fil_lines <- "geo_export_6a96c007-c8ad-4c2f-9447-d3927130ac22.shp"
+fil_boros <- "nybb.shp"
+
+```
+
+The **purpose** of this program is to produce graphs and static maps based on the subway line analysis. This program also sets up a prepared dataset that can be used in the R Shiny app to produce an interactive map.
+
+# Read in summary files
+```{r}
+
+## Station summmary shapefile
+stations <- st_read(dsn = file.path(dss, fil_statsum))
+
+## Line summary dataframe
+linesum <- read_csv(file.path(csv, fil_sum))
+
+## Line shapefiles
+lineshp <- st_read(dsn = file.path(dln, fil_lines))
+
+## Borough shapefile
+boroughs <- st_read(dsn = file.path(dbo, fil_boros)) %>%
+  st_transform(2263)
+
+```
+
+Create color palette for subway lines
+```{r}
+
+rs_group_pal <- c(
+  "#0A2F51", # None OR No to 25% Rent Stabilized when used with rent_stab_ariel
+  "#1D9A6C", # Some OR 26-75% Rent Stabilized when used with rent_stab_ariel 
+  "#81CC3D"  # All OR 75% to Fully Rent Stabilized when used with rent_stab_ariel
+)
+
+subway_pal <- c(
+  "#ee352e", #1/2/3
+  "#00933c", #4/5/6
+  "#b933ad", #7
+  "#0039a6", #A/C/E
+  "#ff6319", #B/D/F/M
+  "#6cbe45", #G
+  "#996633", #J/Z
+  "#a7a9ac", #L
+  "#808183", #S
+  "#fccc0a"  #N/Q/R/W
+)
+
+```
+
+
+## Plot income by train line
+
+```{r}
+linesum %>%
+  ggplot() + 
+  aes(x = forcats::fct_reorder(line, mhhi21, min, .desc = TRUE), y = mhhi21) + 
+  geom_col() + 
+  labs(
+    title = "Median household income along each subway line",
+    caption = "Note: Income is shown in 2021 dollars",
+    x = NULL,
+    y = NULL
+  ) + 
+  scale_y_continuous(labels = scales::dollar) + 
+  theme_minimal()
+  
+```
+
+### Compare line income over time
+
+```{r}
+
+line_income_long <- linesum %>%
+  select(line, mhhi16, mhhi21) %>%
+  # inflation adjust from 2016 to 2021 dollars
+  mutate(mhhi16 = mhhi16 * 1.2417,
+         changehhi = mhhi21-mhhi16) %>%
+  mutate(line = forcats::fct_reorder(line, mhhi21, min, .desc = TRUE)) %>%
+  pivot_longer(cols = -c(line, changehhi), names_to = "year", names_prefix = "mhhi", values_to = "inc") %>%
+  mutate(year = ifelse(year == "16", "2012-2016", "2017-2021"))
+
+
+line_income_long %>%
+  ggplot() + 
+  aes(x = line, y = inc, fill = year) + 
+  geom_col(position = "dodge") + 
+  labs(
+    title = "Median household income along each subway line over the past 10 years",
+    caption = "Note: Income is shown in 2021 dollars",
+    x = NULL
+  ) + 
+  scale_y_continuous(labels = scales::dollar) + 
+  theme_minimal()
+
+```
+
+
+# Maps
+
+First, prep the line shapefile to create maps
+```{r}
+
+lineshp %>% 
+  st_drop_geometry() %>%
+  count(rt_symbol, name)
+
+# Add colors to line files
+lineshp2 <- lineshp %>%
+  mutate(color = case_when(
+    rt_symbol == "1" ~ "#ee352e",
+    rt_symbol == "4" ~ "#00933c",
+    rt_symbol == "7" ~ "#b933ad",
+    rt_symbol == "A" ~ "#0039a6",
+    rt_symbol == "B" ~ "#ff6319",
+    rt_symbol == "G" ~ "#6cbe45",
+    rt_symbol == "J" ~ "#996633",
+    rt_symbol == "L" & name == "L" ~ "#a7a9ac",
+    rt_symbol == "L" & name == "S" ~ "#808183",
+    rt_symbol == "N" ~ "#fccc0a") %>%
+      factor(levels = c("#ee352e", "#00933c", "#b933ad",
+                        "#0039a6", "#ff6319", "#6cbe45",
+                        "#996633", "#a7a9ac", "#808183",
+                        "#fccc0a" ))
+  )
+
+# lineshp2 %>%
+#   st_drop_geometry() %>%
+#   count(color, rt_symbol)
+
+```
+
+```{r}
+
+ggplot() + 
+  geom_sf(data = boroughs, mapping = aes(fill = NULL)) +
+  geom_sf(data = lineshp2, mapping = aes(color = color), show.legend = FALSE) + 
+  scale_color_manual(values = subway_pal) + 
+  geom_point(data = stations, mapping = aes(size = mhhi21, geometry = geometry), stat = "sf_coordinates") + 
+  coord_sf(crs = st_crs(2263))
+
+```
+
