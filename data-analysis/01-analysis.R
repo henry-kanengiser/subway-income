@@ -328,11 +328,15 @@ line_summary <- full_join(pop, numhh, by = "var") %>%
 # summary demographic information for each subway station
 st_write(station_summary, "dat/station_summary.geojson", delete_dsn = T)
 
-# 2022 block group data
-st_write(bg22_2, "dat/bg22.geojson", delete_dsn = T)
+# 2022 block group data (transform to web mercator for web mapping)
+bg22_2 %>%
+  st_transform(st_crs(4326)) %>%
+  st_write("dat/bg22.geojson", delete_dsn = T)
 
 # 2017 block group data
-st_write(bg17_2, "dat/bg17.geojson", delete_dsn = T)
+bg17_2 %>%
+  st_transform(st_crs(4326)) %>%
+  st_write("dat/bg17.geojson", delete_dsn = T)
 
 # subway line summary info
 write_csv(line_summary, "dat/line_summary.csv")
