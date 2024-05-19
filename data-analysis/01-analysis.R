@@ -164,7 +164,7 @@ intersected <- statbuffbg22 %>%
   distinct(station_id) %>%
   pull(station_id)
 
-stats3 %>%
+stations %>%
   st_drop_geometry() %>%
   filter(!station_id %in% intersected)
 
@@ -195,7 +195,7 @@ intersected <- statbuffbg17 %>%
   distinct(station_id) %>%
   pull(station_id)
 
-stats3 %>%
+stations %>%
   st_drop_geometry() %>%
   filter(!station_id %in% intersected)
 
@@ -212,6 +212,18 @@ statbuffbg17 %>%
   st_drop_geometry() %>%
   count(station_id) %>%
   count(n, name = "nbgs")
+
+## Create crosswalk between geoid and station_id that can be appended to bg[17/22]_2
+bg22_xw <- statbuffbg22 %>%
+  st_drop_geometry() %>%
+  group_by(station_id) %>%
+  summarise(bg22_geoids = paste(geoid, collapse = " "))
+  
+bg17_xw <- statbuffbg17 %>%
+  st_drop_geometry() %>%
+  group_by(station_id) %>%
+  summarise(bg17_geoids = paste(geoid, collapse = " "))
+
 
 # 4. Summarize to the station level -------------------------------------------
 
@@ -239,6 +251,8 @@ station_summary <- full_join(stat_sum22, stat_sum17, by = "station_id") %>%
   full_join(select(stations_sf,
                    station_id, daytime_routes, starts_with("flag"), georeference),
             by = "station_id") %>%
+  left_join(bg22_xw, by = "station_id") %>%
+  left_join(bg17_xw, by = "station_id") %>%
   # reassign as spatial data
   st_as_sf(crs = st_crs(2263)) %>% 
   # transform to web mercator for use in web mapping
@@ -312,13 +326,13 @@ line_summary <- full_join(pop, numhh, by = "var") %>%
 # 6. Write permanent files ----------------------------------------------------
 
 # summary demographic information for each subway station
-st_write(station_summary, "dat/station_summary.geojson", delete.dsn = T)
+st_write(station_summary, "dat/station_summary.geojson", delete_dsn = T)
 
 # 2022 block group data
-st_write(bg22_2, "dat/bg22.geojson", delete.dsn = T)
+st_write(bg22_2, "dat/bg22.geojson", delete_dsn = T)
 
 # 2017 block group data
-st_write(bg17_2, "dat/bg17.geojson", delete.dsn = T)
+st_write(bg17_2, "dat/bg17.geojson", delete_dsn = T)
 
 # subway line summary info
 write_csv(line_summary, "dat/line_summary.csv")
