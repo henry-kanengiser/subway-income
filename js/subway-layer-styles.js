@@ -1,3 +1,5 @@
+// Copied from Chris Whong's Subway template project: https://github.com/chriswhong/mapboxgl-nyc-subway
+
 const subwayLayerStyles = [
     {
         "id": "subway_green",

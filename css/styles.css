@@ -17,6 +17,13 @@ body,
     max-width: 400px;
 }
 
+
 h3 {
     margin-top: 0;
+    font-family: "Inconsolata", monospace;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    font-variation-settings:
+      "wdth" 100;
 }
