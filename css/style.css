@@ -1,0 +1,22 @@
+html,
+body,
+#mapContainer {
+    height: 100%;
+    margin: 0;
+}
+
+#overlay {
+    font-family: sans-serif;
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    left: 10px;
+    background: #ccc;
+    padding: 15px;
+    border-radius: 5px;
+    max-width: 400px;
+}
+
+h3 {
+    margin-top: 0;
+}
