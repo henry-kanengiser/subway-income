@@ -1,5 +1,12 @@
 // TO DO LIST
-
+// - Create hover state for subway lines where the width becomes much larger
+// - Create click event when clicking on a subway line. The following happens:
+//    The map zoomes to include the entire subway line (which remains larger width)
+//    New information pops up showing the total population & median HH income of line residents (& rank among subway lines)
+// - Create click event when clicking on a subway stop. The following happens:
+//    Stop changes color (becomes grey)
+//    Zoom in and center the stop
+//    
 
 
 
@@ -10,7 +17,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiaGVucnkta2FuZW5naXNlciIsImEiOiJjbHVsdTU1Z20wa
 const map = new mapboxgl.Map({
   container: 'mapContainer',
   style: 'mapbox://styles/mapbox/light-v10',
-  center: [-73.882646, 40.810616],
+  center: [-73.882646, 40.082616],
   zoom: 9.3
 });
 
