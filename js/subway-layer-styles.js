@@ -2,6 +2,48 @@
 
 const subwayLayerStyles = [
     {
+        "id": "subway-line",
+        "source": "nyc-subway-routes",
+        "type": "line",
+        "filter": [
+            "all",
+            [
+                "==",
+                "rt_symbol",
+                "4"
+            ]
+        ],
+        "paint": {
+            'line-color': [
+                'match',
+                ['get', 'rt_symbol'], // Get the value of rt_symbol
+                "1", "rgba(238, 53, 46, 1)",     // If rt_symbol is 1, set color to 1/2/3 red
+                "4", "rgba(0, 147, 60, 1)",      // If rt_symbol is 4, set color to 4/5/6 green
+                "7", "rgba(185, 51, 173, 1)",    // If rt_symbol is 7, set color to 7 purple
+                "A", "rgba(0, 57, 166, 1)",      // If rt_symbol is A, set color to A/C/E blue
+                "SI", "rgba(0, 57, 166, 1)",     // If rt_symbol is SI, set color to A/C/E blue
+                "B", "rgba(255, 99, 25, 1)",     // If rt_symbol is B, set color to B/D/F/M orange
+                "G", "rgba(108, 190, 69, 1)",    // If rt_symbol is G, set color to G green
+                "L", "rgba(167, 169, 172, 1)",   // If rt_symbol is L, set color to L grey
+                "N", "rgba(252, 204, 10, 1)",    // If rt_symbol is N, set color to N/Q/R/W yellow
+                "J", "rgba(153, 102, 51, 1)",    // If rt_symbol is J, set color to J/Z brown,
+                "S", "#808183"                   // If rt_symbol is S, set color to S grey
+            ],
+            "line-width": {
+                "stops": [
+                    [
+                        10,
+                        1
+                    ],
+                    [
+                        15,
+                        4
+                    ]
+                ]
+            }
+        }
+    },
+    {
         "id": "subway_green",
         "source": "nyc-subway-routes",
         "type": "line",

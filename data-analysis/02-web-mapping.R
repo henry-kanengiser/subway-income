@@ -68,8 +68,30 @@ subway_lines4 <- map_dfr(flags, ~ subway_lines3 %>%
 tm_shape(subway_lines4) + 
   tm_lines("route")
 
-# 3. Save as geojson to read in the mapping project ---------------------------
+# now add rt_symbol back onto the file to align with the styling script
+subway_lines5 <- subway_lines4 %>%
+  mutate(rt_symbol = case_when(
+    route %in% c("1", "2", "3") ~ "1",
+    route %in% c("4", "5", "6") ~ "4",
+    route == "7"                ~ "7",
+    route %in% c("A", "C", "E") ~ "A",
+    route %in% c("B", 'D', 'F', 'M') ~ "B",
+    route == "G"                ~ "G",
+    route %in% c("J", "Z")      ~ "J",
+    route == "L"                ~ "L",
+    route %in% c("N", "Q", "R", "W") ~ "N",
+    route == "SI"               ~ "SI",
+    route == "S"                ~ "S"
+  ))
 
+
+subway_lines5 %>%
+  st_drop_geometry() %>%
+  count(rt_symbol, route)
+
+
+# 3. Save as geojson to read in the mapping project ---------------------------
+st_write(subway_lines5, "dat/nyc-subway-routes.geojson", delete_dsn = T)
 
 
 

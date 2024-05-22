@@ -100,6 +100,43 @@ map.on('style.load', () => {
     data: 'data-analysis/dat/nyc-subway-routes.geojson'
   });
 
+  map.addLayer({
+    "id": "subway-line",
+    "source": "nyc-subway-routes",
+    "type": "line",
+    "paint": {
+      'line-color': [
+        'match',
+        ['get', 'rt_symbol'], // Get the value of rt_symbol
+        "1", "rgba(238, 53, 46, 1)",     // If rt_symbol is 1, set color to 1/2/3 red
+        "4", "rgba(0, 147, 60, 1)",      // If rt_symbol is 4, set color to 4/5/6 green
+        "7", "rgba(185, 51, 173, 1)",    // If rt_symbol is 7, set color to 7 purple
+        "A", "rgba(0, 57, 166, 1)",      // If rt_symbol is A, set color to A/C/E blue
+        "SI", "rgba(0, 57, 166, 1)",     // If rt_symbol is SI, set color to A/C/E blue
+        "B", "rgba(255, 99, 25, 1)",     // If rt_symbol is B, set color to B/D/F/M orange
+        "G", "rgba(108, 190, 69, 1)",    // If rt_symbol is G, set color to G green
+        "L", "rgba(167, 169, 172, 1)",   // If rt_symbol is L, set color to L grey
+        "N", "rgba(252, 204, 10, 1)",    // If rt_symbol is N, set color to N/Q/R/W yellow
+        "J", "rgba(153, 102, 51, 1)",    // If rt_symbol is J, set color to J/Z brown,
+        "S", "#808183",                  // If rt_symbol is S, set color to S grey
+        "#000000"
+
+      ],
+      "line-width": {
+        "stops": [
+          [
+            10,
+            1
+          ],
+          [
+            15,
+            4
+          ]
+        ]
+      }
+    }
+  })
+
   // Don't use the subway stops from Chris Whong's GitHub example, instead use the version I created 
   // map.addSource('nyc-subway-stops', {
   //   type: 'geojson',
@@ -113,10 +150,109 @@ map.on('style.load', () => {
     generateId: true
   });
 
+
+  map.addLayer({
+    "id": "subway_stations",
+    "minzoom": 11,
+    "source": "nyc-subway-stops",
+    "type": "circle",
+    "paint": {
+      "circle-color": "rgba(255, 255, 255, 1)",
+      "circle-opacity": {
+        "stops": [
+          [
+            11,
+            0
+          ],
+          [
+            12,
+            1
+          ]
+        ]
+      },
+      "circle-stroke-opacity": {
+        "stops": [
+          [
+            11,
+            0
+          ],
+          [
+            12,
+            1
+          ]
+        ]
+      },
+      "circle-radius": {
+        "stops": [
+          [
+            10,
+            2
+          ],
+          [
+            14,
+            5
+          ]
+        ]
+      },
+      "circle-stroke-width": 1,
+      "circle-pitch-scale": "map"
+    }
+  }
+  )
+
   // add layers by iterating over the styles in the array defined in subway-layer-styles.js
-  subwayLayerStyles.forEach((style) => {
-    map.addLayer(style)
-  })
+  // subwayLayerStyles.forEach((style) => {
+  //   map.addLayer(style)
+  // })
+
+
+  // Create hover state for subway lines
+  let hoveredsubwaylineId = null;
+
+  // whenever the mouse moves on any of the subway_[color] layers, we check the id of the feature it is on 
+  //  top of, and set featureState for that feature.  The featureState we set is hover:true or hover:false
+  map.on('mousemove', 'cz-fill', (e) => {
+    // don't do anything if there are no features from this layer under the mouse pointer
+    if (e.features.length > 0) {
+      // if hoveredPolygonId already has an id in it, set the featureState for that id to hover: false
+      if (hoveredPolygonId !== null) {
+        map.setFeatureState(
+          { source: 'cz', id: hoveredPolygonId },
+          { hover: false }
+        );
+      }
+
+      // set hoveredPolygonId to the id of the feature currently being hovered
+      hoveredPolygonId = e.features[0].id;
+
+      // set the featureState of this feature to hover:true
+      map.setFeatureState(
+        { source: 'cz', id: hoveredPolygonId },
+        { hover: true }
+      );
+
+      // make the cursor a pointer to let the user know it is clickable
+      map.getCanvas().style.cursor = 'pointer'
+
+      // resets the feature state to the default (nothing is hovered) when the mouse leaves the 'borough-boundaries-fill' layer
+      map.on('mouseleave', 'cz-fill', () => {
+        // set the featureState of the previous hovered feature to hover:false
+        if (hoveredPolygonId !== null) {
+          map.setFeatureState(
+            { source: 'cz', id: hoveredPolygonId },
+            { hover: false }
+          );
+        }
+
+        // clear hoveredPolygonId
+        hoveredPolygonId = null;
+
+        // set the cursor back to default
+        map.getCanvas().style.cursor = ''
+      });
+
+    }
+  });
 
 
 })
