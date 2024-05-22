@@ -24,12 +24,52 @@ tmap_mode("view")
 
 
 # 1. Read in data -------------------------------------------------------------
-stations <- st_read("dat/station_summary.geojson")
-
-#census block group data
-bg22 <- st_read("dat/bg22.geojson")
-bg17 <- st_read("dat/bg17.geojson")
+subway_lines <- st_read("dat/nyc-subway-routes.geojson")
 
 
-# subway line summary info
-write_csv(line_summary, "dat/line_summary.csv")
+# 2. Reformat for web mapping -------------------------------------------------
+
+# subway lines file uses different line segments for each portion of rail
+#  and needs a flag for each route that should be highlighted by the line
+#  use the same flag code used to flag stations
+
+# do this step without geometry and join it back on later
+subway_lines2 <- st_drop_geometry(subway_lines)
+
+subway_lines_geo <- select(subway_lines, cartodb_id, geometry)
+
+routes <- c("1", "2", "3", "4", "5", "6", "7", "A", "B", "C", "D", "E", "F", 
+            "G", "S", "J", "L", "M", "N", "Q", "R", "W", "Z", "SI")
+flags <- paste0("flag", routes)
+
+subway_lines3 <- routes %>%
+  map(~ subway_lines2 %>%
+        mutate(.x = as.numeric(grepl(.x, name, ignore.case=TRUE))) %>%
+        select(.x) %>%
+        set_names(paste0("flag", .x))) %>%
+  bind_cols(subway_lines2, .) %>%
+  # fix issue with R train capturing SIR stations too
+  mutate(flagR = ifelse(flagSI == 1, 0, flagR)) %>%
+  left_join(subway_lines_geo, by = "cartodb_id") %>%
+  st_as_sf() %>%
+  select(-shape_len, -id, -rt_symbol, -url)
+
+
+# now, create a longer version of this dataframe that creates a duplicate of each line segment for each route that uses it
+subway_lines4 <- map_dfr(flags, ~ subway_lines3 %>%
+      filter(!!sym(.x) == 1) %>%
+        st_union() %>%
+        as.data.frame() %>%
+        mutate(route = .x) %>%
+        st_as_sf()
+      ) %>%
+  mutate(route = (str_remove(route, "flag")))
+
+tm_shape(subway_lines4) + 
+  tm_lines("route")
+
+# 3. Save as geojson to read in the mapping project ---------------------------
+
+
+
+
