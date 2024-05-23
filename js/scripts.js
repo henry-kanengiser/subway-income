@@ -285,7 +285,7 @@ map.on('style.load', () => {
     const ymax = e.features[0].properties.ymax;
 
     map.fitBounds([[xmin, ymin], [xmax, ymax]], {
-      padding: 20
+      padding: 100 // add padding so the panels don't obstruct the view of the line
     });
 
     // Insert information into the #info-panel div 
