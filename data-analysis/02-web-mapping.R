@@ -128,7 +128,14 @@ subway_lines6 <- subway_lines5 %>%
 
 # finally, join summary info onto the file
 subway_lines7 <- subway_lines6 %>%
-  left_join(line_summary, by = c("route" = "line"))
+  left_join(line_summary, by = c("route" = "line")) %>%
+  # rename shuttle routes to be more obvious
+  mutate(route = case_when(
+    route == "SM" ~ "Shuttle (M)",
+    route == "SB" ~ "Shuttle (Bk)",
+    route == "SQ" ~ "Shuttle (Q)",
+    TRUE ~ route
+  ))
 
 
 # 3. Save as geojson to read in the mapping project ---------------------------
