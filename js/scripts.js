@@ -97,7 +97,8 @@ map.on('style.load', () => {
   //  pulled from Chris Whong's subway template (https://github.com/chriswhong/mapboxgl-nyc-subway)
   map.addSource('nyc-subway-routes', {
     type: 'geojson',
-    data: 'data-analysis/dat/nyc-subway-routes.geojson'
+    data: 'data-analysis/dat/nyc-subway-routes.geojson',
+    generateId: true // this will add an id to each feature, this is necessary if we want to use featureState (see below)
   });
 
   map.addLayer({
@@ -122,18 +123,23 @@ map.on('style.load', () => {
         "#000000"
 
       ],
-      "line-width": {
-        "stops": [
-          [
-            10,
-            1
-          ],
-          [
-            15,
-            4
-          ]
-        ]
-      }
+      "line-width": [
+        "interpolate", ["linear"], ["zoom"],
+        10,
+          ['case',
+          ['boolean', ['feature-state', 'clicked'], false],
+          ["literal", 2],  // opacity when clicked is true
+          ['boolean', ['feature-state', 'hover'], false],
+          ["literal", 4],
+          ["literal", 1]],
+        14,
+          ['case',
+          ['boolean', ['feature-state', 'clicked'], false],
+          ["literal", 6],  // opacity when clicked is true
+          ['boolean', ['feature-state', 'hover'], false],
+          ["literal", 8],
+          ["literal", 4]]
+      ]
     }
   })
 
@@ -161,7 +167,7 @@ map.on('style.load', () => {
       "circle-opacity": {
         "stops": [
           [
-            11,
+            11.75,
             0
           ],
           [
@@ -173,7 +179,7 @@ map.on('style.load', () => {
       "circle-stroke-opacity": {
         "stops": [
           [
-            11,
+            11.75,
             0
           ],
           [
@@ -211,23 +217,23 @@ map.on('style.load', () => {
 
   // whenever the mouse moves on any of the subway_[color] layers, we check the id of the feature it is on 
   //  top of, and set featureState for that feature.  The featureState we set is hover:true or hover:false
-  map.on('mousemove', 'cz-fill', (e) => {
+  map.on('mousemove', 'subway-line', (e) => {
     // don't do anything if there are no features from this layer under the mouse pointer
     if (e.features.length > 0) {
-      // if hoveredPolygonId already has an id in it, set the featureState for that id to hover: false
-      if (hoveredPolygonId !== null) {
+      // if hoveredsubwaylineId already has an id in it, set the featureState for that id to hover: false
+      if (hoveredsubwaylineId !== null) {
         map.setFeatureState(
-          { source: 'cz', id: hoveredPolygonId },
+          { source: 'nyc-subway-routes', id: hoveredsubwaylineId },
           { hover: false }
         );
       }
 
-      // set hoveredPolygonId to the id of the feature currently being hovered
-      hoveredPolygonId = e.features[0].id;
+      // set hoveredsubwaylineId to the id of the feature currently being hovered
+      hoveredsubwaylineId = e.features[0].id;
 
       // set the featureState of this feature to hover:true
       map.setFeatureState(
-        { source: 'cz', id: hoveredPolygonId },
+        { source: 'nyc-subway-routes', id: hoveredsubwaylineId },
         { hover: true }
       );
 
@@ -235,17 +241,17 @@ map.on('style.load', () => {
       map.getCanvas().style.cursor = 'pointer'
 
       // resets the feature state to the default (nothing is hovered) when the mouse leaves the 'borough-boundaries-fill' layer
-      map.on('mouseleave', 'cz-fill', () => {
+      map.on('mouseleave', 'subway-line', () => {
         // set the featureState of the previous hovered feature to hover:false
-        if (hoveredPolygonId !== null) {
+        if (hoveredsubwaylineId !== null) {
           map.setFeatureState(
-            { source: 'cz', id: hoveredPolygonId },
+            { source: 'nyc-subway-routes', id: hoveredsubwaylineId },
             { hover: false }
           );
         }
 
-        // clear hoveredPolygonId
-        hoveredPolygonId = null;
+        // clear hoveredsubwaylineId
+        hoveredsubwaylineId = null;
 
         // set the cursor back to default
         map.getCanvas().style.cursor = ''
