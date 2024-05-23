@@ -33,6 +33,9 @@ si <- st_read("dat/nyc-subway-routes-segments.geojson") %>%
   filter(rt_symbol == "SI") %>%
   mutate(objectid = as.character(cartodb_id))
 
+# borough boundaries (for separating out different shuttles)
+bb <- st_read("https://data.cityofnewyork.us/resource/7t3b-ywvw.geojson")
+
 # summary stats that should be linked to line
 line_summary <- read_csv("dat/line_summary.csv")
 
@@ -42,7 +45,8 @@ line_summary <- read_csv("dat/line_summary.csv")
 subway_lines <- bind_rows(
   subway_lines_nosi %>% select(name, objectid, rt_symbol, geometry),
   si %>%                select(name, objectid, rt_symbol, geometry)
-)
+) %>%
+  st_join(bb, largest = T)
 
 # subway lines file uses different line segments for each portion of rail
 #  and needs a flag for each route that should be highlighted by the line
@@ -57,8 +61,6 @@ subway_lines_geo <- select(subway_lines, objectid, geometry)
 routes <- c("1", "2", "3", "4", "5", "6", "7", "A", "B", "C", "D", "E", "F", 
             "G", "S", "J", "L", "M", "N", "Q", "R", "W", "Z", "SI")
 
-# create flags version that can be used too
-flags <- paste0("flag", routes)
 
 # use a purrr::map() function to flag each segment for each train route
 #  outputted file will have 24 flag vars, one for each route
@@ -69,11 +71,19 @@ subway_lines3 <- routes %>%
         set_names(paste0("flag", .x))) %>%
   bind_cols(subway_lines2, .) %>%
   # fix issue with R train capturing SIR stations too
-  mutate(flagR = ifelse(flagSI == 1, 0, flagR)) %>%
+  mutate(flagR = ifelse(flagSI == 1, 0, flagR),
+  # create separate flag vars for shuttles in Manhattan, Brooklyn, & Queens
+         flagSM = ifelse(flagS == 1 & boro_name == "Manhattan", 1, 0),
+         flagSB = ifelse(flagS == 1 & boro_name == "Brooklyn", 1, 0),
+         flagSQ = ifelse(flagS == 1 & boro_name == "Queens", 1, 0)) %>%
   left_join(subway_lines_geo, by = "objectid") %>%
   st_as_sf() %>%
   select(-rt_symbol)
 
+
+# create flags version that can be used too
+flags <- c("flag1", "flag2", "flag3", "flag4", "flag5", "flag6", "flag7", "flagA", "flagB", "flagC", "flagD", "flagE", "flagF", 
+            "flagG", "flagSM", "flagSB", "flagSQ", "flagJ", "flagL", "flagM", "flagN", "flagQ", "flagR", "flagW", "flagZ", "flagSI")
 
 # now, use another purrr function to union all segments based on each flag 
 #  individually, and combine them together into one dataframe
@@ -104,7 +114,7 @@ subway_lines5 <- subway_lines4 %>%
     route == "L"                ~ "L",
     route %in% c("N", "Q", "R", "W") ~ "N",
     route == "SI"               ~ "SI",
-    route == "S"                ~ "S"
+    route %in% c("SM", "SB", "SQ") ~ "S"
   ))
 
 # check that this looks right
