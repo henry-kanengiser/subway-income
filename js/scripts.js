@@ -296,6 +296,12 @@ map.on('style.load', () => {
     var pop17 = numeral(e.features[0].properties.pop_tot17).format('0,0')
     var hh17 = numeral(e.features[0].properties.num_hh17).format('0,0')
     var mhhi17 = numeral(e.features[0].properties.mhhi17).format('0,0')
+    var r_pop22 = numeral(e.features[0].properties.rank_pop_tot22).format('0,0')
+    var r_hh22 = numeral(e.features[0].properties.rank_num_hh22).format('0,0')
+    var r_mhhi22 = numeral(e.features[0].properties.rank_mhhi22).format('0,0')
+    var r_pop17 = numeral(e.features[0].properties.rank_pop_tot17).format('0,0')
+    var r_hh17 = numeral(e.features[0].properties.rank_num_hh17).format('0,0')
+    var r_mhhi17 = numeral(e.features[0].properties.rank_mhhi17).format('0,0')
 
     const panelHTML = `
     <div>
@@ -314,20 +320,23 @@ map.on('style.load', () => {
         <tr>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Residents within 1/2 mile of train:</b></td>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${pop22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_pop22}</td>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${pop17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_pop17}</td>
         </tr>
         <tr>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Households within 1/2 mile of train:</b></td>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${hh22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_hh22}</td>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${hh17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_hh17}</td>
         </tr>
         <tr>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Median household income:</b></td>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">$${mhhi22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_mhhi22}</td>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">$${mhhi17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_mhhi17}</td>
         </tr>
     </table>
 </div>
