@@ -92,7 +92,8 @@ bg17 <- get_acs(
 ## 2a. Subway station manipulation ----
 ## Create flags for each subway line
 
-lines <- c("1", "2", "3", "4", "5", "6", "7", "A", "B", "C", "D", "E", "F", "G", "S", "J", "L", "M", "N", "Q", "R", "W", "Z", "SIR")
+lines <- c("1", "2", "3", "4", "5", "6", "7", "A", "B", "C", "D", "E", "F", "G", 
+           "S", "J", "L", "M", "N", "Q", "R", "W", "Z", "SI")
 
 stations2 <- lines %>%
   map(~ stations %>%
@@ -101,9 +102,14 @@ stations2 <- lines %>%
         set_names(paste0("flag", .x))) %>%
   bind_cols(stations, .) %>%
   # fix issue with R train capturing SIR stations too
-  mutate(flagR = ifelse(flagSIR == 1, 0, flagR))
+  mutate(flagR = ifelse(flagSI == 1, 0, flagR),
+  # create separate flag vars for shuttles in Manhattan, Brooklyn, & Queens
+         flagSM = ifelse(flagS == 1 & borough == "M", 1, 0),
+         flagSB = ifelse(flagS == 1 & borough == "Bk", 1, 0),
+         flagSQ = ifelse(flagS == 1 & borough == "Q", 1, 0)) %>%
+  select(-flagS)
 
-# check: number of rows in each flag should gut check match up with the world
+# check: nflagSB# check: number of rows in each flag should gut check match up with the world
 stations2 %>%
   select(starts_with("flag")) %>%
   summarise_all(sum) %>%
@@ -322,6 +328,10 @@ line_summary <- full_join(pop, numhh, by = "var") %>%
   mutate(line = str_remove(var, "flag")) %>%
   select(line, contains("22"), contains("17"), var)
 
+# add ranks for each of these 6 variables
+line_summary2 <- line_summary %>% 
+  mutate(across(pop_tot22:mhhi17, ~ rank(-.), .names = "rank_{.col}"))
+
 
 # 6. Write permanent files ----------------------------------------------------
 
@@ -339,5 +349,5 @@ bg17_2 %>%
   st_write("dat/bg17.geojson", delete_dsn = T)
 
 # subway line summary info
-write_csv(line_summary, "dat/line_summary.csv")
+write_csv(line_summary2, "dat/line_summary.csv")
 
