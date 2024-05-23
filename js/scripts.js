@@ -284,9 +284,58 @@ map.on('style.load', () => {
     const xmax = e.features[0].properties.xmax;
     const ymax = e.features[0].properties.ymax;
 
-    map.fitBounds([[xmin, ymin],[xmax, ymax]], {
+    map.fitBounds([[xmin, ymin], [xmax, ymax]], {
       padding: 20
     });
+
+    // Insert information into the #info-panel div 
+    var route = e.features[0].properties.route
+    var pop22 = numeral(e.features[0].properties.pop_tot22).format('0,0')
+    var hh22 = numeral(e.features[0].properties.num_hh22).format('0,0')
+    var mhhi22 = numeral(e.features[0].properties.mhhi22).format('0,0')
+    var pop17 = numeral(e.features[0].properties.pop_tot17).format('0,0')
+    var hh17 = numeral(e.features[0].properties.num_hh17).format('0,0')
+    var mhhi17 = numeral(e.features[0].properties.mhhi17).format('0,0')
+
+    const panelHTML = `
+    <div>
+      <h3>${route} Train </h3>
+    </div>
+    <p>
+    <div style="border-radius: 10px; padding: 4px;">
+    <table style="border-collapse: collapse; width: 100%">
+        <tr>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> </th>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> 2022 5-year estimate </th>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> Rank (2022) </th>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> 2017 5-year estimate </th>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> Rank (2017) </th>
+        </tr>
+        <tr>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Residents within 1/2 mile of train:</b></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${pop22}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${pop17}</td>
+        </tr>
+        <tr>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Households within 1/2 mile of train:</b></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${hh22}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${hh17}</td>
+        </tr>
+        <tr>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Median household income:</b></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">$${mhhi22}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">$${mhhi17}</td>
+        </tr>
+    </table>
+</div>
+
+    `;
+
+    // Update the info-panel with the table
+    document.getElementById('info-panel-text').innerHTML = panelHTML;
 
   });
 
