@@ -242,7 +242,7 @@ stat_sum22 <- statbuffbg22 %>%
             .groups = "keep") %>%
   ungroup()
 
-stat_sum17 <- statbuffbg22 %>%
+stat_sum17 <- statbuffbg17 %>%
   st_drop_geometry() %>%
   group_by(station_id) %>%
   summarise(pop17 = sum(pop, na.rm = TRUE),
