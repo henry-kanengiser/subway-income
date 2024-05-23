@@ -296,47 +296,60 @@ map.on('style.load', () => {
     var pop17 = numeral(e.features[0].properties.pop_tot17).format('0,0')
     var hh17 = numeral(e.features[0].properties.num_hh17).format('0,0')
     var mhhi17 = numeral(e.features[0].properties.mhhi17).format('0,0')
-    var r_pop22 = numeral(e.features[0].properties.rank_pop_tot22).format('0,0')
-    var r_hh22 = numeral(e.features[0].properties.rank_num_hh22).format('0,0')
-    var r_mhhi22 = numeral(e.features[0].properties.rank_mhhi22).format('0,0')
-    var r_pop17 = numeral(e.features[0].properties.rank_pop_tot17).format('0,0')
-    var r_hh17 = numeral(e.features[0].properties.rank_num_hh17).format('0,0')
-    var r_mhhi17 = numeral(e.features[0].properties.rank_mhhi17).format('0,0')
+    var r_pop22 = numeral(e.features[0].properties.rank_pop_tot22).format('0o')
+    var r_hh22 = numeral(e.features[0].properties.rank_num_hh22).format('0o')
+    var r_mhhi22 = numeral(e.features[0].properties.rank_mhhi22).format('0o')
+    var r_pop17 = numeral(e.features[0].properties.rank_pop_tot17).format('0o')
+    var r_hh17 = numeral(e.features[0].properties.rank_num_hh17).format('0o')
+    var r_mhhi17 = numeral(e.features[0].properties.rank_mhhi17).format('0o')
 
     const panelHTML = `
     <div>
       <h3>${route} Train </h3>
     </div>
-    <p>
+
+    <div>
+      Residents along this route have the <b>${r_mhhi22} highest</b> household income of subway routes ($${mhhi22}). 
+      <p>
+      See the table below for more information.
+    </div>
+
     <div style="border-radius: 10px; padding: 4px;">
-    <table style="border-collapse: collapse; width: 100%">
+    <table style="border-collapse: collapse; width: 10% font-size: smaller">
         <tr>
             <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> </th>
-            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> 2022 5-year estimate </th>
-            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> Rank (2022) </th>
-            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> 2017 5-year estimate </th>
-            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> Rank (2017) </th>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;"> Value </th>
+            <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;"> Rank </th>
+        </tr>
+        <tr>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Median household income</b></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+        </tr>
+        <tr>
+            <td style="border-bottom: 1px solid #cccccc; padding: 2px; font-size: smaller;">2022 5-year estimates</td>
+            <td style="border-bottom: 1px solid #cccccc; padding: 2px; font-size: smaller; text-align: right;">$${mhhi22}</td>
+            <td style="border-bottom: 1px solid #cccccc; padding: 2px; font-size: smaller; text-align: right;">${r_mhhi22}</td>
+        </tr>
+        <tr>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">2017 5-year estimates</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;">$${mhhi17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;">${r_mhhi17}</td>
         </tr>
         <tr>
             <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Residents within 1/2 mile of train:</b></td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${pop22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_pop22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${pop17}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_pop17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
         </tr>
         <tr>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Households within 1/2 mile of train:</b></td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${hh22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_hh22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${hh17}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_hh17}</td>
+            <td style="border-bottom: 1px solid #cccccc; padding: 2px; font-size: smaller;">2022 5-year estimates</td>
+            <td style="border-bottom: 1px solid #cccccc; padding: 2px; font-size: smaller; text-align: right;">${pop22}</td>
+            <td style="border-bottom: 1px solid #cccccc; padding: 2px; font-size: smaller; text-align: right;">${r_pop22}</td>
         </tr>
         <tr>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Median household income:</b></td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">$${mhhi22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_mhhi22}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">$${mhhi17}</td>
-            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">${r_mhhi17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;">2017 5-year estimates</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;">${pop17}</td>
+            <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;">${r_pop17}</td>
         </tr>
     </table>
 </div>
