@@ -1,6 +1,5 @@
 // TO DO LIST
 // - Create click event when clicking on a subway line. The following happens:
-//    The map zoomes to include the entire subway line (which remains larger width)
 //    New information pops up showing the total population & median HH income of line residents (& rank among subway lines)
 // - Create click event when clicking on a subway stop. The following happens:
 //    Stop changes color (becomes grey)
