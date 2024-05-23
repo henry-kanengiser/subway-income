@@ -1,6 +1,7 @@
 // TO DO LIST
 // - Create click event when clicking on a subway line. The following happens:
-//    New information pops up showing the total population & median HH income of line residents (& rank among subway lines)
+//    Census block data appears for blocks associated with that line
+//    Blocks will be interpolate colored and will be explained by a legend on the side
 // - Create click event when clicking on a subway stop. The following happens:
 //    Stop changes color (becomes grey)
 //    Zoom in and center the stop
