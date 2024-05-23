@@ -33,6 +33,9 @@ si <- st_read("dat/nyc-subway-routes-segments.geojson") %>%
   filter(rt_symbol == "SI") %>%
   mutate(objectid = as.character(cartodb_id))
 
+# summary stats that should be linked to line
+line_summary <- read_csv("dat/line_summary.csv")
+
 
 # 2. Reformat for web mapping -------------------------------------------------
 
@@ -113,9 +116,13 @@ subway_lines5 %>%
 subway_lines6 <- subway_lines5 %>%
   cbind(map_dfr(subway_lines5$geometry, st_bbox))
 
+# finally, join summary info onto the file
+subway_lines7 <- subway_lines6 %>%
+  left_join(line_summary, by = c("route" = "line"))
+
 
 # 3. Save as geojson to read in the mapping project ---------------------------
-st_write(subway_lines6, "dat/nyc-subway-routes.geojson", delete_dsn = T)
+st_write(subway_lines7, "dat/nyc-subway-routes.geojson", delete_dsn = T)
 
 
 
