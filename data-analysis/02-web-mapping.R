@@ -24,10 +24,22 @@ tmap_mode("view")
 
 
 # 1. Read in data -------------------------------------------------------------
-subway_lines <- st_read("dat/nyc-subway-routes.geojson")
+# subway_lines <- st_read("dat/nyc-subway-routes-segments.geojson")
+
+subway_lines_nosi <- st_read("https://data.cityofnewyork.us/resource/s7zz-qmyz.geojson")
+
+# this doesn't include SI, so add it in separately
+si <- st_read("dat/nyc-subway-routes-segments.geojson") %>%
+  filter(rt_symbol == "SI") %>%
+  mutate(objectid = as.character(cartodb_id))
 
 
 # 2. Reformat for web mapping -------------------------------------------------
+
+subway_lines <- bind_rows(
+  subway_lines_nosi %>% select(name, objectid, rt_symbol, geometry),
+  si %>%                select(name, objectid, rt_symbol, geometry)
+)
 
 # subway lines file uses different line segments for each portion of rail
 #  and needs a flag for each route that should be highlighted by the line
@@ -36,12 +48,17 @@ subway_lines <- st_read("dat/nyc-subway-routes.geojson")
 # do this step without geometry and join it back on later
 subway_lines2 <- st_drop_geometry(subway_lines)
 
-subway_lines_geo <- select(subway_lines, cartodb_id, geometry)
+subway_lines_geo <- select(subway_lines, objectid, geometry)
 
+# create list of subway routes to use in the function step below
 routes <- c("1", "2", "3", "4", "5", "6", "7", "A", "B", "C", "D", "E", "F", 
             "G", "S", "J", "L", "M", "N", "Q", "R", "W", "Z", "SI")
+
+# create flags version that can be used too
 flags <- paste0("flag", routes)
 
+# use a purrr::map() function to flag each segment for each train route
+#  outputted file will have 24 flag vars, one for each route
 subway_lines3 <- routes %>%
   map(~ subway_lines2 %>%
         mutate(.x = as.numeric(grepl(.x, name, ignore.case=TRUE))) %>%
@@ -50,26 +67,29 @@ subway_lines3 <- routes %>%
   bind_cols(subway_lines2, .) %>%
   # fix issue with R train capturing SIR stations too
   mutate(flagR = ifelse(flagSI == 1, 0, flagR)) %>%
-  left_join(subway_lines_geo, by = "cartodb_id") %>%
+  left_join(subway_lines_geo, by = "objectid") %>%
   st_as_sf() %>%
-  select(-shape_len, -id, -rt_symbol, -url)
+  select(-rt_symbol)
 
 
-# now, create a longer version of this dataframe that creates a duplicate of each line segment for each route that uses it
+# now, use another purrr function to union all segments based on each flag 
+#  individually, and combine them together into one dataframe
 subway_lines4 <- map_dfr(flags, ~ subway_lines3 %>%
       filter(!!sym(.x) == 1) %>%
         st_union() %>%
         as.data.frame() %>%
         mutate(route = .x) %>%
-        st_as_sf()
+        st_as_sf() 
       ) %>%
   mutate(route = (str_remove(route, "flag")))
 
+# map the routes, with different colors for each route
 tm_shape(subway_lines4) + 
-  tm_lines("route")
+  tm_lines("route", lwd = 3)
 
 # now add rt_symbol back onto the file to align with the styling script
 subway_lines5 <- subway_lines4 %>%
+  rowwise() %>%
   mutate(rt_symbol = case_when(
     route %in% c("1", "2", "3") ~ "1",
     route %in% c("4", "5", "6") ~ "4",
@@ -84,14 +104,18 @@ subway_lines5 <- subway_lines4 %>%
     route == "S"                ~ "S"
   ))
 
-
+# check that this looks right
 subway_lines5 %>%
   st_drop_geometry() %>%
   count(rt_symbol, route)
 
+# now create bounding box vars that can be joined on for map dynamic activities
+subway_lines6 <- subway_lines5 %>%
+  cbind(map_dfr(subway_lines5$geometry, st_bbox))
+
 
 # 3. Save as geojson to read in the mapping project ---------------------------
-st_write(subway_lines5, "dat/nyc-subway-routes.geojson", delete_dsn = T)
+st_write(subway_lines6, "dat/nyc-subway-routes.geojson", delete_dsn = T)
 
 
 

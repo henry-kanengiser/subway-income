@@ -1,5 +1,4 @@
 // TO DO LIST
-// - Create hover state for subway lines where the width becomes much larger
 // - Create click event when clicking on a subway line. The following happens:
 //    The map zoomes to include the entire subway line (which remains larger width)
 //    New information pops up showing the total population & median HH income of line residents (& rank among subway lines)
@@ -126,16 +125,16 @@ map.on('style.load', () => {
       "line-width": [
         "interpolate", ["linear"], ["zoom"],
         10,
-          ['case',
+        ['case',
           ['boolean', ['feature-state', 'clicked'], false],
-          ["literal", 2],  // opacity when clicked is true
+          ["literal", 3],  // opacity when clicked is true
           ['boolean', ['feature-state', 'hover'], false],
           ["literal", 4],
           ["literal", 1]],
         14,
-          ['case',
+        ['case',
           ['boolean', ['feature-state', 'clicked'], false],
-          ["literal", 6],  // opacity when clicked is true
+          ["literal", 7],  // opacity when clicked is true
           ['boolean', ['feature-state', 'hover'], false],
           ["literal", 8],
           ["literal", 4]]
@@ -206,14 +205,13 @@ map.on('style.load', () => {
   }
   )
 
-  // add layers by iterating over the styles in the array defined in subway-layer-styles.js
-  // subwayLayerStyles.forEach((style) => {
-  //   map.addLayer(style)
-  // })
 
+
+  ///////////////////////// ADD INTERACTIVE MAP STYLING HERE ////////////////////////
 
   // Create hover state for subway lines
   let hoveredsubwaylineId = null;
+  let clickedsubwaylineId = null;
 
   // whenever the mouse moves on any of the subway_[color] layers, we check the id of the feature it is on 
   //  top of, and set featureState for that feature.  The featureState we set is hover:true or hover:false
@@ -260,5 +258,59 @@ map.on('style.load', () => {
     }
   });
 
+  //// Set up click to add information to the info-panel about subway line
+  // if the user clicks the 'subway-line' layer, extract properties from the clicked feature, using jQuery to write them to another part of the page.
 
-})
+  map.on('click', 'subway-line', (e) => {
+
+    // remove clicked featurestate if it is already set on another feature
+    if (clickedsubwaylineId !== null) {
+      map.setFeatureState(
+        { source: 'nyc-subway-routes', id: clickedsubwaylineId },
+        { clicked: false }
+      )
+    }
+
+    clickedsubwaylineId = e.features[0].id;
+
+    // set the featureState of this feature to hover:true
+    map.setFeatureState(
+      { source: 'nyc-subway-routes', id: clickedsubwaylineId },
+      { clicked: true }
+    )
+
+    // Zoom to the bounds of the subway route to show all of it at once
+    const xmin = e.features[0].properties.xmin;
+    const ymin = e.features[0].properties.ymin;
+    const xmax = e.features[0].properties.xmax;
+    const ymax = e.features[0].properties.ymax;
+
+    map.fitBounds([[xmin, ymin],[xmax, ymax]], {
+      padding: 20
+    });
+
+  });
+
+  // DOESN'T WORK WELL WITH MULTIPLE ROUTES AT ONCE, SO CREATE A BUTTON THAT CAN CLEAR THE CLICKED FEATURE
+  // de-select the route by clicking elsewhere on the map
+  map.on('click', function (e) {
+    var features = map.queryRenderedFeatures(e.point);
+
+    if (!features.length) {
+      // User clicked on a blank part of the map
+      // Set the feature state of previously clicked features to `clicked: false`
+      // Replace 'your-layer-id' with the ID of your layer
+      map.setFeatureState(
+        { source: 'nyc-subway-routes', id: clickedsubwaylineId },
+        { clicked: false }
+
+      );
+
+    }
+
+  });
+});
+
+
+
+// })
