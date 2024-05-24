@@ -31,10 +31,10 @@ body,
     max-width: 400px;
 }
 
-/* .btn-close {
+.btn-close {
     position: absolute;
     right: 10px;
-} */
+}
 
 .legend {
     font-family: sans-serif;

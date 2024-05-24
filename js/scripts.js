@@ -1,10 +1,7 @@
 // TO DO LIST
-// - Create click event when clicking on a subway line. The following happens:
-//    Census block data appears for blocks associated with that line
-//    Blocks will be interpolate colored and will be explained by a legend on the side
-// - Create click event when clicking on a subway stop. The following happens:
-//    Stop changes color (becomes grey)
-//    Zoom in and center the stop
+// - Maybe consider census tracts instead of block groups? Lots of missing data at the block group level
+// - Look at list of layers using the console.log and put the block groups below the streets. Then up the opacity
+// - Look at list of layers and replace waterway-label with the lowest "-label" layer
 //    
 
 
@@ -21,10 +18,14 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiaGVucnkta2FuZW5naXNlciIsImEiOiJjbHVsdTU1Z20wa
 // initialize the mapboxGL map in the div with id 'mapContainer'
 const map = new mapboxgl.Map({
   container: 'mapContainer',
-  style: 'mapbox://styles/mapbox/light-v10',
+  style: 'mapbox://styles/mapbox/dark-v10',
   center: [-73.882646, 40.082616],
   zoom: 9.3
 });
+
+// Create variables prior to map loading so they can be used in listeners
+let hoveredsubwaylineId = null
+let clickedsubwaylineId = null
 
 // wait for the initial mapbox style to load before loading our own data
 map.on('style.load', () => {
@@ -95,7 +96,7 @@ map.on('style.load', () => {
         '#810f7c'
 
       ],
-      'fill-opacity': ["case", ["==", ["get", 'mhhi'], null], 0.1, 0.5]
+      'fill-opacity': ["case", ["==", ["get", 'mhhi'], null], 0.3, 0.5]
     }
   }, 'waterway-label');
 
@@ -104,9 +105,22 @@ map.on('style.load', () => {
     'id': 'bg22-line',
     'type': 'line',
     'source': 'bg22', // reference the data source read in above
+    // 'minzoom': 11,
     'layout': {},
     'paint': {
-      'line-color': '#ccc'
+      'line-color': '#292929',
+      'line-opacity': {
+        "stops": [
+          [
+            11.75,
+            0
+          ],
+          [
+            12,
+            1
+          ]
+        ]
+      }
     }
   }, 'waterway-label');
 
@@ -233,9 +247,6 @@ map.on('style.load', () => {
   ///////////////////////// ADD INTERACTIVE MAP STYLING HERE ////////////////////////
 
   // Create hover state for subway lines
-  let hoveredsubwaylineId = null;
-  let clickedsubwaylineId = null;
-
   // whenever the mouse moves on any of the subway_[color] layers, we check the id of the feature it is on 
   //  top of, and set featureState for that feature.  The featureState we set is hover:true or hover:false
   map.on('mousemove', 'subway-line', (e) => {
@@ -318,17 +329,17 @@ map.on('style.load', () => {
       'bg22-fill',
       'visibility'
     );
-  
+
     if (currentvisibility === 'none') {
       map.setLayoutProperty('bg22-line', 'visibility', 'visible');
       map.setLayoutProperty('bg22-fill', 'visibility', 'visible');
-    } 
+    }
     // Comment this out, this will toggle the visibility of the fills
     // else {
     //   map.setLayoutProperty('bg22-line', 'visibility', 'none');
     //   map.setLayoutProperty('bg22-fill', 'visibility', 'none');
     // }
-    
+
     const flagvar = e.features[0].properties.var;
 
     map.setFilter('bg22-line', ['==', flagvar, 1]);
@@ -431,6 +442,18 @@ map.on('style.load', () => {
   });
 });
 
-// Define what happens when clicking the info-panel button
+// Script to hide info-panel and reset the train route selection
+function closeinfo() {
+  $('#info-panel').hide();
 
-// })
+  // set the featureState of this feature to clicked:false
+  map.setFeatureState(
+    { source: 'nyc-subway-routes', id: clickedsubwaylineId },
+    { clicked: false }
+  )
+  // hide block group line and fill information
+  map.setLayoutProperty('bg22-line', 'visibility', 'none');
+  map.setLayoutProperty('bg22-fill', 'visibility', 'none');
+
+}
+
