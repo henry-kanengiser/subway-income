@@ -8,6 +8,12 @@
 //    
 
 
+// Turn on popovers
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+
+// Hide info-panel so it can be shown later
+$('#info-panel').hide();
 
 // set my mapboxgl access token
 mapboxgl.accessToken = 'pk.eyJ1IjoiaGVucnkta2FuZW5naXNlciIsImEiOiJjbHVsdTU1Z20waG84MnFwbzQybmozMjdrIn0.tqmZ-jfP2M6xcOz09ckRPA';
@@ -71,8 +77,25 @@ map.on('style.load', () => {
     'source': 'bg22', // reference the data source read in above
     'layout': {},
     'paint': {
-      'fill-color': '#ccc',
-      'fill-opacity': 0.2
+      'fill-color': [
+        // // create fill colors based on site suitability scores (var: index)
+        'interpolate',
+        ['linear'],
+        ['get', 'mhhi'],
+        // colors mirror the static maps created for the report
+        0,
+        '#edf8fb',
+        50000,
+        '#b3cde3',
+        100000,
+        '#8c96c6',
+        150000,
+        '#8856a7',
+        200000,
+        '#810f7c'
+
+      ],
+      'fill-opacity': ["case", ["==", ["get", 'mhhi'], null], 0.1, 0.5]
     }
   }, 'waterway-label');
 
@@ -289,6 +312,32 @@ map.on('style.load', () => {
       padding: 100 // add padding so the panels don't obstruct the view of the line
     });
 
+    // Show the block groups associated with that route
+
+    const currentvisibility = map.getLayoutProperty(
+      'bg22-fill',
+      'visibility'
+    );
+  
+    if (currentvisibility === 'none') {
+      map.setLayoutProperty('bg22-line', 'visibility', 'visible');
+      map.setLayoutProperty('bg22-fill', 'visibility', 'visible');
+    } 
+    // Comment this out, this will toggle the visibility of the fills
+    // else {
+    //   map.setLayoutProperty('bg22-line', 'visibility', 'none');
+    //   map.setLayoutProperty('bg22-fill', 'visibility', 'none');
+    // }
+    
+    const flagvar = e.features[0].properties.var;
+
+    map.setFilter('bg22-line', ['==', flagvar, 1]);
+    map.setFilter('bg22-fill', ['==', flagvar, 1]);
+
+    // Set visibility for legend as well
+    $('#info-panel').show();
+
+
     // Insert information into the #info-panel div 
     var route = e.features[0].properties.route
     var pop22 = numeral(e.features[0].properties.pop_tot22).format('0,0')
@@ -382,6 +431,6 @@ map.on('style.load', () => {
   });
 });
 
-
+// Define what happens when clicking the info-panel button
 
 // })
