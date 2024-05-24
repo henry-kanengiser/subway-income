@@ -231,6 +231,39 @@ bg17_xw <- statbuffbg17 %>%
   summarise(bg17_geoids = paste(geoid, collapse = " "))
 
 
+## Add route flags to the block group data ----
+bg22_flags <- statbuffbg22 %>%
+  st_drop_geometry() %>%
+  # create list of flags for each geoid
+  select(geoid, starts_with("flag")) %>%
+  group_by(geoid) %>%
+  # geoids are duplicated for different routes, keep all flags
+  summarise(across(starts_with("flag"), ~max(.x, na.rm = T)))
+
+bg22_3 <- bg22_2 %>%
+  left_join(bg22_flags, by = "geoid") %>%
+  # remove bg's with empty geometry
+  filter(!st_is_empty(.)) %>%
+  # replace NAs among flag vars that are outside the subway network
+  mutate(across(starts_with("flag"), ~replace_na(.x, 0)))
+
+
+bg17_flags <- statbuffbg17 %>%
+  st_drop_geometry() %>%
+  # create list of flags for each geoid
+  select(geoid, starts_with("flag")) %>%
+  group_by(geoid) %>%
+  # geoids are duplicated for different routes, keep all flags
+  summarise(across(starts_with("flag"), ~max(.x, na.rm = T)))
+
+bg17_3 <- bg17_2 %>%
+  left_join(bg17_flags, by = "geoid") %>%
+  # remove bg's with empty geometry
+  filter(!st_is_empty(.)) %>%
+  # replace NAs among flag vars that are outside the subway network
+  mutate(across(starts_with("flag"), ~replace_na(.x, 0)))
+
+
 # 4. Summarize to the station level -------------------------------------------
 
 stat_sum22 <- statbuffbg22 %>%
@@ -339,12 +372,12 @@ line_summary2 <- line_summary %>%
 st_write(station_summary, "dat/station_summary.geojson", delete_dsn = T)
 
 # 2022 block group data (transform to web mercator for web mapping)
-bg22_2 %>%
+bg22_3 %>%
   st_transform(st_crs(4326)) %>%
   st_write("dat/bg22.geojson", delete_dsn = T)
 
 # 2017 block group data
-bg17_2 %>%
+bg17_3 %>%
   st_transform(st_crs(4326)) %>%
   st_write("dat/bg17.geojson", delete_dsn = T)
 
