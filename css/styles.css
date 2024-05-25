@@ -54,6 +54,12 @@ body,
     font-size: 12px;
   }
 
+  .legend:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
   .legend-key {
     display: inline-block;
     border-radius: 20%;
@@ -62,6 +68,19 @@ body,
     margin-right: 5px;
   }
 
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* workaround for manually creating a bs button smaller than .btn-sm 
+source: https://stackoverflow.com/questions/33911049/btn-xs-no-longer-a-valid-option-in-bootstrap-4 */
+.btn-group-xs > .btn, .btn-xs {
+  padding: .6rem 1rem;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: .2rem;
+}
 
 h3 {
     margin-top: 0;

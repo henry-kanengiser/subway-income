@@ -1,6 +1,5 @@
 // TO DO LIST
-// - Look at list of layers using the console.log and put the block groups below the streets. Then up the opacity
-// - Look at list of layers and replace waterway-label with the lowest "-label" layer
+// - Add 'missing' to the legend 
 // - Create button to switch between population & household income (and adjust legend div accordingly)
 // - Figure out why the table of info doesn't stretch the whole way across the div
 
@@ -29,6 +28,9 @@ let clickedsubwaylineId = null
 
 // wait for the initial mapbox style to load before loading our own data
 map.on('style.load', () => {
+  // Log the layers of the map in the console (commented out for now sincce we don't need this info right now)
+  // console.log(map.getStyle().layers);
+
   // fitbounds to NYC
   map.fitBounds([
     [-74.270056, 40.494061],
@@ -50,7 +52,7 @@ map.on('style.load', () => {
       'fill-color': '#ccc',
       'fill-opacity': 0.2
     }
-  }, 'waterway-label');
+  }, 'road-label');
 
   // Add a new layer to visualize campaign zone areas (fill)
   map.addLayer({
@@ -61,7 +63,7 @@ map.on('style.load', () => {
     'paint': {
       'line-color': '#ccc'
     }
-  }, 'waterway-label');
+  }, 'road-label');
 
   // Set this layer to not be visible initially so it can be turned on using the botton
   map.setLayoutProperty('tract17-fill', 'visibility', 'none');
@@ -96,9 +98,38 @@ map.on('style.load', () => {
         '#810f7c'
 
       ],
-      'fill-opacity': ["case", ["==", ["get", 'mhhi'], null], 0.3, 0.5]
+      'fill-opacity': ["case", ["==", ["get", 'mhhi'], null], 0.3, 1]
     }
-  }, 'waterway-label');
+  }, 'building-outline');
+
+  // Create population fill layer
+  map.addLayer({
+    'id': 'tract22-fill-pop',
+    'type': 'fill',
+    'source': 'tract22', // reference the data source read in above
+    'layout': {},
+    'paint': {
+      'fill-color': [
+        // // create fill colors based on site suitability scores (var: index)
+        'interpolate',
+        ['linear'],
+        ['get', 'pop'],
+        // colors mirror the static maps created for the report
+        0,
+        '#fef0d9',
+        2500,
+        '#fdcc8a',
+        5000,
+        '#fc8d59',
+        7500,
+        '#e34a33',
+        10000,
+        '#b30000'
+
+      ],
+      'fill-opacity': ["case", ["==", ["get", 'pop'], null], 0.3, 1]
+    }
+  }, 'building-outline');
 
   // Add a new layer to visualize campaign zone areas (fill)
   map.addLayer({
@@ -108,7 +139,7 @@ map.on('style.load', () => {
     // 'minzoom': 11,
     'layout': {},
     'paint': {
-      'line-color': '#292929',
+      'line-color': '#efefef',
       'line-opacity': {
         "stops": [
           [
@@ -122,11 +153,12 @@ map.on('style.load', () => {
         ]
       }
     }
-  }, 'waterway-label');
+  }, 'road-label');
 
   // Set this layer to not be visible initially so it can be turned on using the botton
   map.setLayoutProperty('tract22-fill', 'visibility', 'none');
   map.setLayoutProperty('tract22-line', 'visibility', 'none');
+  map.setLayoutProperty('tract22-fill-pop', 'visibility', 'none');
 
 
   // add geojson sources for subway routes and stops
@@ -342,8 +374,9 @@ map.on('style.load', () => {
 
     const flagvar = e.features[0].properties.var;
 
-    // map.setFilter('tract22-line', ['==', flagvar, 1]);
+    map.setFilter('tract22-line', ['==', flagvar, 1]);
     map.setFilter('tract22-fill', ['==', flagvar, 1]);
+    map.setFilter('tract22-fill-pop', ['==', flagvar, 1]);
 
     // Set visibility for legend as well
     $('#info-panel').show();
@@ -456,4 +489,30 @@ function closeinfo() {
   map.setLayoutProperty('tract22-fill', 'visibility', 'none');
 
 }
+
+// Script to toggle the mhhi information via the button
+$('#mhhi-button').on('click', function () {
+
+  // set the button to active state & toggle the other button 
+  $(this).toggleClass("active");
+  $('#pop-button').toggleClass("active");
+
+  // make the mhhi layer visible and the population layer not visible
+  map.setLayoutProperty('tract22-fill', 'visibility', 'visible');
+  map.setLayoutProperty('tract22-fill-pop', 'visibility', 'none');
+
+})
+
+// Script to toggle the pop information via the button
+$('#pop-button').on('click', function () {
+
+  // set the button to active state
+  $(this).toggleClass("active");
+  $('#mhhi-button').toggleClass("active");
+
+  // make the mhhi layer visible and the population layer not visible
+  map.setLayoutProperty('tract22-fill-pop', 'visibility', 'visible');
+  map.setLayoutProperty('tract22-fill', 'visibility', 'none');
+
+})
 
