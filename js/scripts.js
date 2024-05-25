@@ -1,8 +1,8 @@
 // TO DO LIST
-// - Maybe consider census tracts instead of block groups? Lots of missing data at the block group level
 // - Look at list of layers using the console.log and put the block groups below the streets. Then up the opacity
 // - Look at list of layers and replace waterway-label with the lowest "-label" layer
-//    
+// - Create button to switch between population & household income (and adjust legend div accordingly)
+// - Figure out why the table of info doesn't stretch the whole way across the div
 
 
 // Turn on popovers
@@ -35,16 +35,16 @@ map.on('style.load', () => {
     [-73.663062, 40.957187]
   ])
 
-  // Add Census block group data (bg 17 and bg 22)
-  map.addSource('bg17', {
+  // Add Census tract data (tract 17 and tract 22)
+  map.addSource('tract17', {
     type: 'geojson',
-    data: 'data-analysis/dat/bg17.geojson'
+    data: 'data-analysis/dat/tract17.geojson'
   });
 
   map.addLayer({
-    'id': 'bg17-fill',
+    'id': 'tract17-fill',
     'type': 'fill',
-    'source': 'bg17', // reference the data source read in above
+    'source': 'tract17', // reference the data source read in above
     'layout': {},
     'paint': {
       'fill-color': '#ccc',
@@ -54,9 +54,9 @@ map.on('style.load', () => {
 
   // Add a new layer to visualize campaign zone areas (fill)
   map.addLayer({
-    'id': 'bg17-line',
+    'id': 'tract17-line',
     'type': 'line',
-    'source': 'bg17', // reference the data source read in above
+    'source': 'tract17', // reference the data source read in above
     'layout': {},
     'paint': {
       'line-color': '#ccc'
@@ -64,18 +64,18 @@ map.on('style.load', () => {
   }, 'waterway-label');
 
   // Set this layer to not be visible initially so it can be turned on using the botton
-  map.setLayoutProperty('bg17-fill', 'visibility', 'none');
-  map.setLayoutProperty('bg17-line', 'visibility', 'none');
+  map.setLayoutProperty('tract17-fill', 'visibility', 'none');
+  map.setLayoutProperty('tract17-line', 'visibility', 'none');
 
-  map.addSource('bg22', {
+  map.addSource('tract22', {
     type: 'geojson',
-    data: 'data-analysis/dat/bg22.geojson'
+    data: 'data-analysis/dat/tract22.geojson'
   });
 
   map.addLayer({
-    'id': 'bg22-fill',
+    'id': 'tract22-fill',
     'type': 'fill',
-    'source': 'bg22', // reference the data source read in above
+    'source': 'tract22', // reference the data source read in above
     'layout': {},
     'paint': {
       'fill-color': [
@@ -102,9 +102,9 @@ map.on('style.load', () => {
 
   // Add a new layer to visualize campaign zone areas (fill)
   map.addLayer({
-    'id': 'bg22-line',
+    'id': 'tract22-line',
     'type': 'line',
-    'source': 'bg22', // reference the data source read in above
+    'source': 'tract22', // reference the data source read in above
     // 'minzoom': 11,
     'layout': {},
     'paint': {
@@ -125,8 +125,8 @@ map.on('style.load', () => {
   }, 'waterway-label');
 
   // Set this layer to not be visible initially so it can be turned on using the botton
-  map.setLayoutProperty('bg22-fill', 'visibility', 'none');
-  map.setLayoutProperty('bg22-line', 'visibility', 'none');
+  map.setLayoutProperty('tract22-fill', 'visibility', 'none');
+  map.setLayoutProperty('tract22-line', 'visibility', 'none');
 
 
   // add geojson sources for subway routes and stops
@@ -323,27 +323,27 @@ map.on('style.load', () => {
       padding: 100 // add padding so the panels don't obstruct the view of the line
     });
 
-    // Show the block groups associated with that route
+    // Show the tracts associated with that route
 
     const currentvisibility = map.getLayoutProperty(
-      'bg22-fill',
+      'tract22-fill',
       'visibility'
     );
 
     if (currentvisibility === 'none') {
-      map.setLayoutProperty('bg22-line', 'visibility', 'visible');
-      map.setLayoutProperty('bg22-fill', 'visibility', 'visible');
+      map.setLayoutProperty('tract22-line', 'visibility', 'visible');
+      map.setLayoutProperty('tract22-fill', 'visibility', 'visible');
     }
     // Comment this out, this will toggle the visibility of the fills
     // else {
-    //   map.setLayoutProperty('bg22-line', 'visibility', 'none');
-    //   map.setLayoutProperty('bg22-fill', 'visibility', 'none');
+    //   map.setLayoutProperty('tract22-line', 'visibility', 'none');
+    //   map.setLayoutProperty('tract22-fill', 'visibility', 'none');
     // }
 
     const flagvar = e.features[0].properties.var;
 
-    map.setFilter('bg22-line', ['==', flagvar, 1]);
-    map.setFilter('bg22-fill', ['==', flagvar, 1]);
+    // map.setFilter('tract22-line', ['==', flagvar, 1]);
+    map.setFilter('tract22-fill', ['==', flagvar, 1]);
 
     // Set visibility for legend as well
     $('#info-panel').show();
@@ -451,9 +451,9 @@ function closeinfo() {
     { source: 'nyc-subway-routes', id: clickedsubwaylineId },
     { clicked: false }
   )
-  // hide block group line and fill information
-  map.setLayoutProperty('bg22-line', 'visibility', 'none');
-  map.setLayoutProperty('bg22-fill', 'visibility', 'none');
+  // hide tract line and fill information
+  map.setLayoutProperty('tract22-line', 'visibility', 'none');
+  map.setLayoutProperty('tract22-fill', 'visibility', 'none');
 
 }
 

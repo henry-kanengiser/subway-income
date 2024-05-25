@@ -38,8 +38,8 @@ stations <- read_csv("https://data.ny.gov/resource/39hk-dx4f.csv")
 # -   2018-2022 (most recent)
 # -   2013-2017 (longer ago)
 
-bg22 <- get_acs(
-  geography = "block group",
+tract22 <- get_acs(
+  geography = "tract",
   variables = c(
     pop  = "B01001_001",
     nhh  = "B19001_001",
@@ -62,8 +62,8 @@ bg22 <- get_acs(
     grepl("Queens", name) ~ "Queens",
     grepl("Richmond", name) ~ "Richmond",))
 
-bg17 <- get_acs(
-  geography = "block group",
+tract17 <- get_acs(
+  geography = "tract",
   variables = c(
     pop  = "B01001_001",
     nhh  = "B19001_001",
@@ -135,37 +135,37 @@ tm_shape(stations_buffer) +
 # simplify datasets
 ## Note that the two datasets cannot be merged because they rely on different
 ##  geometries (2010 and 2020 block group borders)
-bg22_2 <- bg22 %>%
+tract22_2 <- tract22 %>%
   select(geoid, pop = popestimate, nhh = nhhestimate, mhhi = mhhiestimate, geometry) %>%
   st_transform(crs = st_crs(2263))
 
-bg17_2 <- bg17 %>%
+tract17_2 <- tract17 %>%
   select(geoid, pop = popestimate, nhh = nhhestimate, mhhi = mhhiestimate, geometry) %>%
   st_transform(crs = st_crs(2263))
 
 # create centroid version of each file to intersect with the buffers
-bg22_c <- st_centroid(bg22_2)
-bg17_c <- st_centroid(bg17_2)
+tract22_c <- st_centroid(tract22_2)
+tract17_c <- st_centroid(tract17_2)
 
 
 # 3. Link census data to subway stations --------------------------------------
 
 # Intersect the station buffers layer with the 
-statbuffbg22 <- stations_buffer %>%
-  st_intersection(bg22_c)
+statbufftract22 <- stations_buffer %>%
+  st_intersection(tract22_c)
 
-statbuffbg17 <- stations_buffer %>%
-  st_intersection(bg17_c)
+statbufftract17 <- stations_buffer %>%
+  st_intersection(tract17_c)
 
 ### Checks on this intersection ----
 ## How many stations are in the file?
-statbuffbg22 %>%
+statbufftract22 %>%
   st_drop_geometry() %>%
   distinct(station_id) %>%
   nrow()
 
 ### which stations aren't in the file anymore?
-intersected <- statbuffbg22 %>%
+intersected <- statbufftract22 %>%
   st_drop_geometry() %>%
   distinct(station_id) %>%
   pull(station_id)
@@ -174,29 +174,29 @@ stations %>%
   st_drop_geometry() %>%
   filter(!station_id %in% intersected)
 
-## How many census bgs are in the file?
-statbuffbg22 %>%
+## How many census tracts are in the file?
+statbufftract22 %>%
   st_drop_geometry() %>%
   distinct(geoid) %>%
   nrow()
 
-glimpse(statbuffbg22)
+glimpse(statbufftract22)
 
-# How many bgs are within each stationid? Shouldn't be too many
-statbuffbg22 %>%
+# How many tracts are within each stationid? Shouldn't be too many
+statbufftract22 %>%
   st_drop_geometry() %>%
   count(station_id) %>%
-  count(n, name = "nbgs")
+  count(n, name = "ntracts")
 
 
 ## How many stations are in the file?
-statbuffbg17 %>%
+statbufftract17 %>%
   st_drop_geometry() %>%
   distinct(station_id) %>%
   nrow()
 
 ### which stations aren't in the file anymore?
-intersected <- statbuffbg17 %>%
+intersected <- statbufftract17 %>%
   st_drop_geometry() %>%
   distinct(station_id) %>%
   pull(station_id)
@@ -205,34 +205,34 @@ stations %>%
   st_drop_geometry() %>%
   filter(!station_id %in% intersected)
 
-## How many census bgs are in the file?
-statbuffbg17 %>%
+## How many census tracts are in the file?
+statbufftract17 %>%
   st_drop_geometry() %>%
   distinct(geoid) %>%
   nrow()
 
-glimpse(statbuffbg17)
+glimpse(statbufftract17)
 
-# How many bgs are within each stationid? Shouldn't be too many
-statbuffbg17 %>%
+# How many tracts are within each stationid? Shouldn't be too many
+statbufftract17 %>%
   st_drop_geometry() %>%
   count(station_id) %>%
-  count(n, name = "nbgs")
+  count(n, name = "ntracts")
 
-## Create crosswalk between geoid and station_id that can be appended to bg[17/22]_2
-bg22_xw <- statbuffbg22 %>%
+## Create crosswalk between geoid and station_id that can be appended to tract[17/22]_2
+tract22_xw <- statbufftract22 %>%
   st_drop_geometry() %>%
   group_by(station_id) %>%
-  summarise(bg22_geoids = paste(geoid, collapse = " "))
+  summarise(tract22_geoids = paste(geoid, collapse = " "))
   
-bg17_xw <- statbuffbg17 %>%
+tract17_xw <- statbufftract17 %>%
   st_drop_geometry() %>%
   group_by(station_id) %>%
-  summarise(bg17_geoids = paste(geoid, collapse = " "))
+  summarise(tract17_geoids = paste(geoid, collapse = " "))
 
 
 ## Add route flags to the block group data ----
-bg22_flags <- statbuffbg22 %>%
+tract22_flags <- statbufftract22 %>%
   st_drop_geometry() %>%
   # create list of flags for each geoid
   select(geoid, starts_with("flag")) %>%
@@ -240,15 +240,15 @@ bg22_flags <- statbuffbg22 %>%
   # geoids are duplicated for different routes, keep all flags
   summarise(across(starts_with("flag"), ~max(.x, na.rm = T)))
 
-bg22_3 <- bg22_2 %>%
-  left_join(bg22_flags, by = "geoid") %>%
-  # remove bg's with empty geometry
+tract22_3 <- tract22_2 %>%
+  left_join(tract22_flags, by = "geoid") %>%
+  # remove tract's with empty geometry
   filter(!st_is_empty(.)) %>%
   # replace NAs among flag vars that are outside the subway network
   mutate(across(starts_with("flag"), ~replace_na(.x, 0)))
 
 
-bg17_flags <- statbuffbg17 %>%
+tract17_flags <- statbufftract17 %>%
   st_drop_geometry() %>%
   # create list of flags for each geoid
   select(geoid, starts_with("flag")) %>%
@@ -256,9 +256,9 @@ bg17_flags <- statbuffbg17 %>%
   # geoids are duplicated for different routes, keep all flags
   summarise(across(starts_with("flag"), ~max(.x, na.rm = T)))
 
-bg17_3 <- bg17_2 %>%
-  left_join(bg17_flags, by = "geoid") %>%
-  # remove bg's with empty geometry
+tract17_3 <- tract17_2 %>%
+  left_join(tract17_flags, by = "geoid") %>%
+  # remove tract's with empty geometry
   filter(!st_is_empty(.)) %>%
   # replace NAs among flag vars that are outside the subway network
   mutate(across(starts_with("flag"), ~replace_na(.x, 0)))
@@ -266,7 +266,7 @@ bg17_3 <- bg17_2 %>%
 
 # 4. Summarize to the station level -------------------------------------------
 
-stat_sum22 <- statbuffbg22 %>%
+stat_sum22 <- statbufftract22 %>%
   st_drop_geometry() %>%
   group_by(station_id, stop_name) %>%
   summarise(pop22 = sum(pop, na.rm = TRUE),
@@ -275,7 +275,7 @@ stat_sum22 <- statbuffbg22 %>%
             .groups = "keep") %>%
   ungroup()
 
-stat_sum17 <- statbuffbg17 %>%
+stat_sum17 <- statbufftract17 %>%
   st_drop_geometry() %>%
   group_by(station_id) %>%
   summarise(pop17 = sum(pop, na.rm = TRUE),
@@ -290,8 +290,8 @@ station_summary <- full_join(stat_sum22, stat_sum17, by = "station_id") %>%
   full_join(select(stations_sf,
                    station_id, daytime_routes, starts_with("flag"), georeference),
             by = "station_id") %>%
-  left_join(bg22_xw, by = "station_id") %>%
-  left_join(bg17_xw, by = "station_id") %>%
+  left_join(tract22_xw, by = "station_id") %>%
+  left_join(tract17_xw, by = "station_id") %>%
   # reassign as spatial data
   st_as_sf(crs = st_crs(2263)) %>% 
   # transform to web mercator for use in web mapping
@@ -372,14 +372,14 @@ line_summary2 <- line_summary %>%
 st_write(station_summary, "dat/station_summary.geojson", delete_dsn = T)
 
 # 2022 block group data (transform to web mercator for web mapping)
-bg22_3 %>%
+tract22_3 %>%
   st_transform(st_crs(4326)) %>%
-  st_write("dat/bg22.geojson", delete_dsn = T)
+  st_write("dat/tract22.geojson", delete_dsn = T)
 
 # 2017 block group data
-bg17_3 %>%
+tract17_3 %>%
   st_transform(st_crs(4326)) %>%
-  st_write("dat/bg17.geojson", delete_dsn = T)
+  st_write("dat/tract17.geojson", delete_dsn = T)
 
 # subway line summary info
 write_csv(line_summary2, "dat/line_summary.csv")
