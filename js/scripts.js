@@ -1,7 +1,7 @@
 // TO DO LIST
 // - Add 'missing' to the legend 
-// - Create button to switch between population & household income (and adjust legend div accordingly)
-// - Figure out why the table of info doesn't stretch the whole way across the div
+// - Double check that legend is working on the github page
+// - Add styling to subway stops (white if it's associated with that route, otherwise grey?)
 
 
 // Turn on popovers
