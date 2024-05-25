@@ -18,11 +18,18 @@ body,
     max-width: 400px;
 }
 
+#source {
+  padding-top: 15px;
+  font-size: 12px;
+  /* font-family: "Inconsolata", monospace; */
+
+}
+
 #info-panel {
     font-family: sans-serif;
     position: absolute;
     z-index: 1;
-    top: 10px;
+    bottom: 25px;
     right: 10px;
     background: #f2f2f2;
     border: 1px solid #000000;
@@ -86,6 +93,15 @@ h3 {
     margin-top: 0;
     font-size: x-large;
     font-family: "Inconsolata", monospace;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+    font-variation-settings:
+      "wdth" 100;
+}
+
+.titlefont {
+  font-family: "Inconsolata", monospace;
     font-optical-sizing: auto;
     font-weight: 700;
     font-style: normal;

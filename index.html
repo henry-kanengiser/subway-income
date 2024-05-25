@@ -27,13 +27,56 @@
 
     <div id="overlay">
         <h3>Income by Subway Line</h3>
-        <p>New Yorkers often identify with their subway line. This map shows how similar and different the communities
+        <!-- <p>New Yorkers often identify with their subway line. This map shows how similar and different the communities
             that live along each line are from one another.</p>
         <p>[ADD CALL TO ACTION HERE WHEN THE MAP DATA IS SET UP]</p>
         <p>For sourcing info, see the readme on <a href="https://github.com/chriswhong/mapboxgl-nyc-subway">Github</a>
         </p>
         <p>The rest of this panel will include an embedded bar chart showing the relative income of residents along each
-            subway line</p>
+            subway line</p> -->
+
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header titlefont" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        About this Project
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                    data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <p>New Yorkers often identify with their subway line. This map shows how similar and different
+                            the
+                            communities that live along each line are from one another. I mapped the census tracts
+                            within
+                            half a mile of each subway stop to find the community that uses each subway line.
+                            <strong>Click on a subway line to see more info.</strong>
+                        </p>
+                        <p>For sourcing info, see the readme on <a
+                                href="https://github.com/chriswhong/mapboxgl-nyc-subway">Github</a>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header titlefont" id="headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Summary Information
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                    data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        This accordion will contain the following interactive figures, created in datawrapper:
+                        - Median HH income by subway line
+                        - Population by subway line
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="titlefont" id="source"> Created by Henry Kanengiser, see <a
+                href="https://github.com/henry-kanengiser/subway-income" target="_blank">Github</a> for more details </div>
     </div>
     <div id="info-panel">
         <button type="button" class="btn-close" onclick=closeinfo() aria-label="Close"></button>
