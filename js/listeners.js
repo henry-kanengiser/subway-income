@@ -12,6 +12,7 @@ function closeinfo() {
     // hide tract line and fill information
     map.setLayoutProperty('tract22-line', 'visibility', 'none');
     map.setLayoutProperty('tract22-fill', 'visibility', 'none');
+    map.setLayoutProperty('tract22-fill-pop', 'visibility', 'none');
 
 }
 

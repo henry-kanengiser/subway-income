@@ -409,7 +409,7 @@ map.on('style.load', () => {
     </div>
 
     <div style="border-radius: 10px; padding: 4px;">
-    <table style="border-collapse: collapse; width: 10% font-size: smaller">
+    <table style="border-collapse: collapse; width: 100%; font-size: smaller">
         <tr>
             <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"> </th>
             <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;"> Value </th>
