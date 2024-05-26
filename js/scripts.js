@@ -29,7 +29,7 @@ let clickedsubwaylineId = null
 // wait for the initial mapbox style to load before loading our own data
 map.on('style.load', () => {
   // Log the layers of the map in the console (commented out for now sincce we don't need this info right now)
-  // console.log(map.getStyle().layers);
+  console.log(map.getStyle().layers);
 
   // fitbounds to NYC
   map.fitBounds([
@@ -100,7 +100,7 @@ map.on('style.load', () => {
       ],
       'fill-opacity': ["case", ["==", ["get", 'mhhi'], null], 0.3, 1]
     }
-  }, 'building-outline');
+  }, 'admin-1-boundary-bg');
 
   // Create population fill layer
   map.addLayer({
@@ -129,7 +129,7 @@ map.on('style.load', () => {
       ],
       'fill-opacity': ["case", ["==", ["get", 'pop'], null], 0.3, 1]
     }
-  }, 'building-outline');
+  }, 'admin-1-boundary-bg');
 
   // Add a new layer to visualize campaign zone areas (fill)
   map.addLayer({
@@ -323,6 +323,24 @@ map.on('style.load', () => {
 
     }
   });
+
+  //// At higher zoom, move the tract fill layers behind buildings so you can see more detail
+  //    This keeps the map looking cleaner when zoomed out further
+  map.on('zoomend', function () {
+    var currentZoom = map.getZoom();
+    
+    if (currentZoom > 12) {
+      // Adjust layer position using map.moveLayer()
+      map.moveLayer('tract22-fill', 'building-outline');
+      map.moveLayer('tract22-fill-pop', 'building-outline');
+    }
+    else {
+      // Return them to the higher level
+      map.moveLayer('tract22-fill', 'admin-1-boundary-bg');
+      map.moveLayer('tract22-fill-pop', 'admin-1-boundary-bg');
+    }
+  });
+
 
   //// Set up click to add information to the info-panel about subway line
   // if the user clicks the 'subway-line' layer, extract properties from the clicked feature, using jQuery to write them to another part of the page.
