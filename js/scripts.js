@@ -1,5 +1,4 @@
 // TO DO LIST
-// - Add 'missing' to the legend 
 // - Double check that legend is working on the github page
 // - Figure out way to set up buttons to select each subway route (will need to link the button to a particular feature id)
 
@@ -116,6 +115,8 @@ map.on('style.load', () => {
         ['get', 'pop'],
         // colors mirror the static maps created for the report
         0,
+        '#282726',
+        1,
         '#fef0d9',
         2500,
         '#fdcc8a',
