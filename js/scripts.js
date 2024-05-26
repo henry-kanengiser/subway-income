@@ -1,7 +1,7 @@
 // TO DO LIST
 // - Add 'missing' to the legend 
 // - Double check that legend is working on the github page
-// - Add styling to subway stops (white if it's associated with that route, otherwise grey?)
+// - Figure out way to set up buttons to select each subway route (will need to link the button to a particular feature id)
 
 
 // Turn on popovers
@@ -226,7 +226,7 @@ map.on('style.load', () => {
 
 
   map.addLayer({
-    "id": "subway_stations",
+    "id": "subway-stations",
     "minzoom": 11,
     "source": "nyc-subway-stops",
     "type": "circle",
@@ -274,6 +274,58 @@ map.on('style.load', () => {
   }
   )
 
+  // Add second version that will deemphasize stops that aren't selected
+  map.addLayer({
+    "id": "subway-stations-darker",
+    "minzoom": 11,
+    "source": "nyc-subway-stops",
+    "type": "circle",
+    "paint": {
+      "circle-color": "#999999",
+      "circle-opacity": {
+        "stops": [
+          [
+            11.75,
+            0
+          ],
+          [
+            12,
+            1
+          ]
+        ]
+      },
+      "circle-stroke-opacity": {
+        "stops": [
+          [
+            11.75,
+            0
+          ],
+          [
+            12,
+            1
+          ]
+        ]
+      },
+      "circle-radius": {
+        "stops": [
+          [
+            10,
+            2
+          ],
+          [
+            14,
+            5
+          ]
+        ]
+      },
+      "circle-stroke-width": 1,
+      "circle-pitch-scale": "map"
+    }
+  }
+  )
+
+  // Set this layer to not be visible initially so it can be turned on using the botton
+  map.setLayoutProperty('subway-stations-darker', 'visibility', 'none');
 
 
   ///////////////////////// ADD INTERACTIVE MAP STYLING HERE ////////////////////////
@@ -328,7 +380,7 @@ map.on('style.load', () => {
   //    This keeps the map looking cleaner when zoomed out further
   map.on('zoomend', function () {
     var currentZoom = map.getZoom();
-    
+
     if (currentZoom > 12) {
       // Adjust layer position using map.moveLayer()
       map.moveLayer('tract22-fill', 'building-outline');
@@ -390,11 +442,17 @@ map.on('style.load', () => {
     //   map.setLayoutProperty('tract22-fill', 'visibility', 'none');
     // }
 
+    // Restrict census tract date to only what is related to the clicked id
     const flagvar = e.features[0].properties.var;
 
     map.setFilter('tract22-line', ['==', flagvar, 1]);
     map.setFilter('tract22-fill', ['==', flagvar, 1]);
     map.setFilter('tract22-fill-pop', ['==', flagvar, 1]);
+
+    // Do the same for the subway stops (deemphasize the stops that aren't associated with that clicked route)
+    map.setLayoutProperty('subway-stations-darker', 'visibility', 'visible');
+    map.setFilter('subway-stations-darker', ['==', flagvar, 0]);
+
 
     // Set visibility for legend as well
     $('#info-panel').show();
