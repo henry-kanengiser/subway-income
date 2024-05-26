@@ -49,9 +49,9 @@ $('#pop-button').on('click', function () {
 // Script to trigger subway line information from the dropdown menu
 
 // Retrieve features from the map layer
-const features = map.queryRenderedFeatures({layers: 'subway-line'});
+// const features = map.queryRenderedFeatures({layers: 'subway-line'});
 
-console.log(features);
+// console.log(features);
 
 // // Create buttons dynamically for each feature
 // features.forEach((feature, index) => {

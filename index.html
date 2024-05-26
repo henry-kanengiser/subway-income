@@ -79,42 +79,59 @@
                 href="https://github.com/henry-kanengiser/subway-income" target="_blank">Github</a> for more details
         </div>
     </div>
-    <div id="line-dropdown">
+    
+    <div class="accordion line-dropdown" id="accordion-subwaylines">
+        <div class="accordion-item">
+            <h2 class="accordion-header titlefont" id="headinglines">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapselines" aria-expanded="true" aria-controls="collapselines">
+                    Click on a subway line or select it from the dropdown list
+                </button>
+            </h2>
+            <div id="collapselines" class="accordion-collapse collapse show" aria-labelledby="headinglines"
+                data-bs-parent="#accordion-subwaylines">
+                <div class="accordion-body">
+                    <span><button>A</button></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <div id="line-dropdown">
         <div class="dropdown">
-            <button class="btn btn-light dropdown-toggle titlefont btn-block" type="button" id="dropdownMenuButton1" style="text-align:left; padding-left:10px"
-                data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-light dropdown-toggle titlefont btn-block" type="button" id="dropdownMenuButton1"
+                style="text-align:left; padding-left:10px" data-bs-toggle="dropdown" aria-expanded="false">
                 Click on a subway line or select it from the <br> dropdown list
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" name="A" href="#">A</a></li>
-                <li><a class="dropdown-item" name="B" href="#">B</a></li>
-                <li><a class="dropdown-item" name="C" href="#">C</a></li>
-                <li><a class="dropdown-item" name="D" href="#">D</a></li>
-                <li><a class="dropdown-item" name="E" href="#">E</a></li>
-                <li><a class="dropdown-item" name="F" href="#">F</a></li>
-                <li><a class="dropdown-item" name="G" href="#">G</a></li>
-                <li><a class="dropdown-item" name="J" href="#">J</a></li>
-                <li><a class="dropdown-item" name="L" href="#">L</a></li>
-                <li><a class="dropdown-item" name="M" href="#">M</a></li>
-                <li><a class="dropdown-item" name="N" href="#">N</a></li>
-                <li><a class="dropdown-item" name="Q" href="#">Q</a></li>
-                <li><a class="dropdown-item" name="R" href="#">R</a></li>
-                <li><a class="dropdown-item" name="SM" href="#">S (M)</a></li>
-                <li><a class="dropdown-item" name="SB" href="#">S (Bk)</a></li>
-                <li><a class="dropdown-item" name="SQ" href="#">S (Q)</a></li>
-                <li><a class="dropdown-item" name="SI" href="#">SIR</a></li>
-                <li><a class="dropdown-item" name="W" href="#">W</a></li>
-                <li><a class="dropdown-item" name="Z" href="#">Z</a></li>
-                <li><a class="dropdown-item" name="1" href="#">1</a></li>
-                <li><a class="dropdown-item" name="2" href="#">2</a></li>
-                <li><a class="dropdown-item" name="3" href="#">3</a></li>
-                <li><a class="dropdown-item" name="4" href="#">4</a></li>
-                <li><a class="dropdown-item" name="5" href="#">5</a></li>
-                <li><a class="dropdown-item" name="6" href="#">6</a></li>
-                <li><a class="dropdown-item" name="7" href="#">7</a></li>
+                <li><a class="dropdown-item" name="flagA" href="#">A</a></li>
+                <li><a class="dropdown-item" name="flagB" href="#">B</a></li>
+                <li><a class="dropdown-item" name="flagC" href="#">C</a></li>
+                <li><a class="dropdown-item" name="flagD" href="#">D</a></li>
+                <li><a class="dropdown-item" name="flagE" href="#">E</a></li>
+                <li><a class="dropdown-item" name="flagF" href="#">F</a></li>
+                <li><a class="dropdown-item" name="flagG" href="#">G</a></li>
+                <li><a class="dropdown-item" name="flagJ" href="#">J</a></li>
+                <li><a class="dropdown-item" name="flagL" href="#">L</a></li>
+                <li><a class="dropdown-item" name="flagM" href="#">M</a></li>
+                <li><a class="dropdown-item" name="flagN" href="#">N</a></li>
+                <li><a class="dropdown-item" name="flagQ" href="#">Q</a></li>
+                <li><a class="dropdown-item" name="flagR" href="#">R</a></li>
+                <li><a class="dropdown-item" name="flagSM" href="#">S (M)</a></li>
+                <li><a class="dropdown-item" name="flagSB" href="#">S (Bk)</a></li>
+                <li><a class="dropdown-item" name="flagSQ" href="#">S (Q)</a></li>
+                <li><a class="dropdown-item" name="flagSI" href="#">SIR</a></li>
+                <li><a class="dropdown-item" name="flagW" href="#">W</a></li>
+                <li><a class="dropdown-item" name="flagZ" href="#">Z</a></li>
+                <li><a class="dropdown-item" name="flag1" href="#">1</a></li>
+                <li><a class="dropdown-item" name="flag2" href="#">2</a></li>
+                <li><a class="dropdown-item" name="flag3" href="#">3</a></li>
+                <li><a class="dropdown-item" name="flag4" href="#">4</a></li>
+                <li><a class="dropdown-item" name="flag5" href="#">5</a></li>
+                <li><a class="dropdown-item" name="flag6" href="#">6</a></li>
+                <li><a class="dropdown-item" name="flag7" href="#">7</a></li>
             </ul>
         </div>
-    </div>
+    </div> -->
     <div id="info-panel">
         <button type="button" class="btn-close" onclick=closeinfo() aria-label="Close"></button>
         <div id="info-panel-text"></div>

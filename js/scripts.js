@@ -28,7 +28,7 @@ let clickedsubwaylineId = null
 // wait for the initial mapbox style to load before loading our own data
 map.on('style.load', () => {
   // Log the layers of the map in the console (commented out for now sincce we don't need this info right now)
-  console.log(map.getStyle().layers);
+  // console.log(map.getStyle().layers);
 
   // fitbounds to NYC
   map.fitBounds([
