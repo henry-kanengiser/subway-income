@@ -167,7 +167,8 @@ map.on('style.load', () => {
   map.addSource('nyc-subway-routes', {
     type: 'geojson',
     data: 'data-analysis/dat/nyc-subway-routes.geojson',
-    generateId: true // this will add an id to each feature, this is necessary if we want to use featureState (see below)
+    promoteId: 'route' // assign route code to be the ID (necessary for linking buttons to features)
+    // generateId: true // this will add an id to each feature, this is necessary if we want to use featureState (see below)
   });
 
   map.addLayer({
@@ -410,6 +411,8 @@ map.on('style.load', () => {
 
     clickedsubwaylineId = e.features[0].id;
 
+    console.log('clicked subway id: ' + clickedsubwaylineId)
+
     // set the featureState of this feature to hover:true
     map.setFeatureState(
       { source: 'nyc-subway-routes', id: clickedsubwaylineId },
@@ -533,4 +536,68 @@ map.on('style.load', () => {
   });
 
 });
+
+// Onlly run this function once the map is fully loaded
+map.on('render', afterChangeComplete); // warning: this fires many times per second!
+
+function afterChangeComplete() {
+  if (!map.loaded()) { return } // still not loaded; bail out.
+
+  // now that the map is loaded, it's safe to query the features:
+
+  var source = map.getSource('nyc-subway-routes');
+
+  // STOPPED HERE Getting closer, but it always clicks on the first feature of the layer (SI), 
+  //  not sure why and not sure how to fix this
+
+  // // Query all features from the line
+  // var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] });
+
+
+  // Version based on feature id
+  var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function (feature) {
+    return feature.id === 'J';
+  });
+  // // Version based on route attribute
+  // var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function(feature) {
+  //   return feature.properties.route === 'SI';
+  // });
+
+  // log which line is being queried to the console
+  console.log('var buttonline:');
+  console.log(buttonline[0]);
+
+  // simulate a click on this feature
+  map.fire('click', {
+    features: [buttonline[10]],
+    source: source,
+    target: "J"
+  });
+
+  map.off('render', afterChangeComplete); // remove this handler now that we're done.
+}
+
+// map.once('style.load', function() {
+// map.on('load', function() {
+//   var source = map.getSource('nyc-subway-routes');
+
+//   console.log('source.id: ' + source.id);
+
+//   console.log(map.getStyle().layers);
+//   var features = map.queryRenderedFeatures({ layers: ['subway-lines'] });
+
+//   console.log('features ' + features);
+
+//   var featureId = features[0].id;
+
+
+//   console.log(featureId);
+//   // map.fire('click', {
+//   //     lngLat: /* set the coordinates of the feature */,
+//   //     point: /* set the point of the feature */,
+//   //     features: [features[0]],
+//   //     source: source.id,
+//   //     target: featureId
+//   // });
+// });
 
