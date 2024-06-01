@@ -1,6 +1,10 @@
 // TO DO LIST
-// - Double check that legend is working on the github page
 // - Figure out way to set up buttons to select each subway route (will need to link the button to a particular feature id)
+// - Check underlying census tract data (seems to be missing for parts of SI)
+// - Maybe move button list into the overlay accordion to keep the screen cleaner
+// - Add in datawrapper interactive figure of income & population by train line
+// - Reevaluate the 2017 data, is it really helpful? May want to just focus on 2022
+// - Hover popup for census tracts above a certain zoom that shows geoid, population, & income?
 
 
 // Turn on popovers
