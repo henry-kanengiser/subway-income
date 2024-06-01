@@ -46,22 +46,49 @@ $('#pop-button').on('click', function () {
 
 })
 
-// Script to trigger subway line information from the dropdown menu
+// Script to trigger subway line information from the dropdown menu (doing it for A train before iterating it)
+// Getting closer, but it always clicks on the first feature of the layer (SI), 
+//  not sure why and not sure how to fix this
+function showline() {
+    // Only run this function once the map is fully loaded (not needed in this iteration)
+    // map.on('render', afterChangeComplete); // warning: this fires many times per second!
 
-// Retrieve features from the map layer
+    // function afterChangeComplete() {
+    if (!map.loaded()) {
+        console.log('map not loaded yet');
+        return
+    } // still not loaded; bail out.
 
-// map.once('render', function () {
-//     var features = map.queryRenderedFeatures({ layers: ['subway-line'] });
+    // now that the map is loaded, it's safe to query the features:
 
-//     console.log(features);
-//     // map.fire('click', {
-//     //     lngLat: /* set the coordinates of the feature */,
-//     //     point: /* set the point of the feature */,
-//     //     features: [features[0]],
-//     //     source: source.id,
-//     //     target: featureId
-//     // });
-// });
+    var source = map.getSource('nyc-subway-routes');
+
+    // // Query all features from the line
+    // var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] });
+
+    // Version based on feature id
+    var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function (feature) {
+        return feature.id === 'A';
+    });
+    // // Version based on route attribute
+    // var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function(feature) {
+    //   return feature.properties.route === 'SI';
+    // });
+
+    // log which line is being queried to the console
+    console.log('var buttonline:');
+    console.log(buttonline[0]);
+
+
+    // simulate a click on this feature (I think something is missing here)
+    map.fire('click', 'subway-line', {
+        source: buttonline[0],
+        target: "A"
+    });
+
+    // map.off('render', afterChangeComplete); // remove this handler now that we're done.
+    // }
+}
 
 
 
