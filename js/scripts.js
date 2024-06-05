@@ -49,7 +49,7 @@ function showLineData(feat) {
   const ymax = feat.properties.ymax;
 
   map.fitBounds([[xmin, ymin], [xmax, ymax]], {
-    padding: 100 // add padding so the panels don't obstruct the view of the line
+    padding: {top: 50, bottom: 50, left: 500, right: 500} // add padding so the panels don't obstruct the view of the line
   });
 
   // Show the tracts associated with that route
