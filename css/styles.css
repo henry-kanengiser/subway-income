@@ -9,13 +9,15 @@ body,
   font-family: sans-serif;
   position: absolute;
   z-index: 1;
-  top: 10px;
-  left: 10px;
+  top: 1vh;
+  left: 1vh;
   background: #f2f2f2;
   border: 1px solid #000000;
   padding: 15px;
   border-radius: 5px;
   max-width: 400px;
+  max-height: 98vh;
+  overflow: auto;
 }
 
 #note {
@@ -39,10 +41,19 @@ body,
   width: 400px;
 }
 
+.accordion-button {
+  font-size: 14px;
+}
 /* Add custom styling so the opened button is not the default light blue */
 /* Source code: https://stackoverflow.com/questions/66791309/trying-to-change-the-background-color-of-the-bootstrap-accordion-title-when-open */
 .accordion-button:not(.collapsed) {
   background-color: #e3e3e3;
+}
+
+.fig-title {
+  font-size: small;
+  padding-top: 10px;
+
 }
 
 /* #dropdownMenuButton1 {
@@ -60,8 +71,8 @@ body,
   font-family: sans-serif;
   position: absolute;
   z-index: 1;
-  bottom: 25px;
-  right: 10px;
+  top: 1vh;
+  right: 1vh;
   background: #f2f2f2;
   border: 1px solid #000000;
   padding: 15px;
@@ -148,6 +159,13 @@ h3 {
   font-style: normal;
   font-variation-settings:
     "wdth" 100;
+}
+
+.tabfont {
+  font-family: "Inconsolata", monospace;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: 12px;
 }
 
 .titlefont {
