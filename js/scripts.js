@@ -33,6 +33,8 @@ let clickedsubwaylineId = null;
 //   Credit to Chris Whong for helping me figure out the right way to set this up to work with the subway bullet buttons
 function showLineData(feat) {
 
+  console.log(feat)
+
   console.log('running showLineData on feat ' + feat.id);
   var clickedsubwaylineId = feat.id;
 
@@ -86,7 +88,7 @@ function showLineData(feat) {
 
 
   // Insert information into the #info-panel div 
-  var route = feat.properties.route
+  var route = feat.properties.route_long
   var pop22 = numeral(feat.properties.pop_tot22).format('0,0')
   var hh22 = numeral(feat.properties.num_hh22).format('0,0')
   var mhhi22 = numeral(feat.properties.mhhi22).format('0,0')
