@@ -49,45 +49,15 @@ $('#pop-button').on('click', function () {
 // Script to trigger subway line information from the dropdown menu (doing it for A train before iterating it)
 // Getting closer, but it always clicks on the first feature of the layer (SI), 
 //  not sure why and not sure how to fix this
-function showline() {
-    // Only run this function once the map is fully loaded (not needed in this iteration)
-    // map.on('render', afterChangeComplete); // warning: this fires many times per second!
-
-    // function afterChangeComplete() {
-    if (!map.loaded()) {
-        console.log('map not loaded yet');
-        return
-    } // still not loaded; bail out.
-
-    // now that the map is loaded, it's safe to query the features:
-
-    var source = map.getSource('nyc-subway-routes');
-
-    // // Query all features from the line
-    // var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] });
+function showline(letter) {
 
     // Version based on feature id
-    var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function (feature) {
-        return feature.id === 'A';
-    });
-    // // Version based on route attribute
-    // var buttonline = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function(feature) {
-    //   return feature.properties.route === 'SI';
-    // });
-
-    // log which line is being queried to the console
-    console.log('var buttonline:');
-    console.log(buttonline[0]);
-
-
-    // simulate a click on this feature (I think something is missing here)
-    map.fire('click', 'subway-line', {
-        source: buttonline[0],
-        target: "A"
+    var buttonlinefeatures = map.queryRenderedFeatures({ layers: ['subway-line'] }).filter(function (feature) {
+        return feature.id === letter;
     });
 
-    // map.off('render', afterChangeComplete); // remove this handler now that we're done.
-    // }
+    showLineData(buttonlinefeatures[0])
+
 }
 
 
