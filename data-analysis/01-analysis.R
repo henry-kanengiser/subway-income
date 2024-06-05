@@ -139,8 +139,11 @@ tract22_2 <- tract22 %>%
   select(geoid, pop = popestimate, nhh = nhhestimate, mhhi = mhhiestimate, geometry) %>%
   st_transform(crs = st_crs(2263))
 
+# 2017 data should be inflation adjusted to 2022 dollars
+# $1 in 2017 is worth $1.19 in 2022 (https://www.officialdata.org/us/inflation/2017?endYear=2022&amount=1)
 tract17_2 <- tract17 %>%
-  select(geoid, pop = popestimate, nhh = nhhestimate, mhhi = mhhiestimate, geometry) %>%
+  select(geoid, pop = popestimate, nhh = nhhestimate, mhhi17d = mhhiestimate, geometry) %>%
+  mutate(mhhi = mhhi17d * 1.1939) %>%
   st_transform(crs = st_crs(2263))
 
 # create centroid version of each file to intersect with the buffers
