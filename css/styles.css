@@ -112,7 +112,7 @@ body,
   border-radius: 50%;
   display: inline-block;
   background-color: #fdfbfb; /* Change this to desired button color */
-  /* border: none; */ /* Turns off border color, which might be nice*/
+  border: none; /* Turns off border color, which might be nice*/
   cursor: pointer;
   text-align: center;
   text-decoration: none;

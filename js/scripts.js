@@ -1,6 +1,6 @@
 // TO DO LIST
 // - Figure out way to set up buttons to select each subway route (will need to link the button to a particular feature id)
-// - Check underlying census tract data (seems to be missing for parts of SI)
+// - Check underlying census tract data (seems to be missing for parts of SI and the 4 train)
 // - Maybe move button list into the overlay accordion to keep the screen cleaner
 // - Add in datawrapper interactive figure of income & population by train line
 // - Reevaluate the 2017 data, is it really helpful? May want to just focus on 2022
@@ -33,6 +33,7 @@ let clickedsubwaylineId = null;
 //   Credit to Chris Whong for helping me figure out the right way to set this up to work with the subway bullet buttons
 function showLineData(feat) {
 
+  console.log('running showLineData on feat ' + feat.id);
   var clickedsubwaylineId = feat.id;
 
   // set the featureState of this feature to hover:true

@@ -74,66 +74,104 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="titlefont" id="source"> Created by Henry Kanengiser, see <a
-                href="https://github.com/henry-kanengiser/subway-income" target="_blank">Github</a> for more details
-        </div>
-    </div>
-    
-    <div class="accordion line-dropdown" id="accordion-subwaylines">
-        <div class="accordion-item">
-            <h2 class="accordion-header titlefont" id="headinglines">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapselines" aria-expanded="true" aria-controls="collapselines">
-                    Click on a subway line or select it from the dropdown list
-                </button>
-            </h2>
-            <div id="collapselines" class="accordion-collapse collapse" aria-labelledby="headinglines"
-                data-bs-parent="#accordion-subwaylines">
-                <div class="accordion-body">
-                    <button class="bullet-button" id="A" onclick="showline('A')">
-                        <img src = "data-analysis/subway-bullets/a-letter.svg" alt="A-train bullet"/>
+            <div class="accordion-item">
+                <h2 class="accordion-header titlefont" id="headinglines">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapselines" aria-expanded="false" aria-controls="collapselines">
+                        Click on a subway line or select it from the dropdown list
                     </button>
+                </h2>
+                <div id="collapselines" class="accordion-collapse collapse" aria-labelledby="headinglines"
+                    data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <span><button class="bullet-button" onclick="showline('A')">
+                                <img src="data-analysis/subway-bullets/a-letter.svg" alt="A-train bullet" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('C')">
+                                <img src="data-analysis/subway-bullets/c-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('E')">
+                                <img src="data-analysis/subway-bullets/e-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('B')">
+                                <img src="data-analysis/subway-bullets/b-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('D')">
+                                <img src="data-analysis/subway-bullets/d-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('F')">
+                                <img src="data-analysis/subway-bullets/f-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('M')">
+                                <img src="data-analysis/subway-bullets/m-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('N')">
+                                <img src="data-analysis/subway-bullets/n-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('Q')">
+                                <img src="data-analysis/subway-bullets/q-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('R')">
+                                <img src="data-analysis/subway-bullets/r-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('W')">
+                                <img src="data-analysis/subway-bullets/w-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('G')">
+                                <img src="data-analysis/subway-bullets/g-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('L')">
+                                <img src="data-analysis/subway-bullets/l-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('J')">
+                                <img src="data-analysis/subway-bullets/j-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('Z')">
+                                <img src="data-analysis/subway-bullets/z-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('1')">
+                                <img src="data-analysis/subway-bullets/1-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('2')">
+                                <img src="data-analysis/subway-bullets/2-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('3')">
+                                <img src="data-analysis/subway-bullets/3-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('4')">
+                                <img src="data-analysis/subway-bullets/4-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('5')">
+                                <img src="data-analysis/subway-bullets/5-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('6')">
+                                <img src="data-analysis/subway-bullets/6-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('7')">
+                                <img src="data-analysis/subway-bullets/7-digit.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('SI')">
+                                <img src="data-analysis/subway-bullets/sir.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('Shuttle (M)')">
+                                <img src="data-analysis/subway-bullets/s-letter.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('Shuttle (Bk)')">
+                                <img src="data-analysis/subway-bullets/sf.svg" />
+                            </button></span>
+                        <span><button class="bullet-button" onclick="showline('Shuttle (Q)')">
+                                <img src="data-analysis/subway-bullets/sr.svg" />
+                            </button></span>
+
+                    </div>
                 </div>
             </div>
+            <div class="titlefont" id="source"> Created by Henry Kanengiser, see <a
+                    href="https://github.com/henry-kanengiser/subway-income" target="_blank">Github</a> for more details
+            </div>
         </div>
+
     </div>
-    <!-- <div id="line-dropdown">
-        <div class="dropdown">
-            <button class="btn btn-light dropdown-toggle titlefont btn-block" type="button" id="dropdownMenuButton1"
-                style="text-align:left; padding-left:10px" data-bs-toggle="dropdown" aria-expanded="false">
-                Click on a subway line or select it from the <br> dropdown list
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" name="flagA" href="#">A</a></li>
-                <li><a class="dropdown-item" name="flagB" href="#">B</a></li>
-                <li><a class="dropdown-item" name="flagC" href="#">C</a></li>
-                <li><a class="dropdown-item" name="flagD" href="#">D</a></li>
-                <li><a class="dropdown-item" name="flagE" href="#">E</a></li>
-                <li><a class="dropdown-item" name="flagF" href="#">F</a></li>
-                <li><a class="dropdown-item" name="flagG" href="#">G</a></li>
-                <li><a class="dropdown-item" name="flagJ" href="#">J</a></li>
-                <li><a class="dropdown-item" name="flagL" href="#">L</a></li>
-                <li><a class="dropdown-item" name="flagM" href="#">M</a></li>
-                <li><a class="dropdown-item" name="flagN" href="#">N</a></li>
-                <li><a class="dropdown-item" name="flagQ" href="#">Q</a></li>
-                <li><a class="dropdown-item" name="flagR" href="#">R</a></li>
-                <li><a class="dropdown-item" name="flagSM" href="#">S (M)</a></li>
-                <li><a class="dropdown-item" name="flagSB" href="#">S (Bk)</a></li>
-                <li><a class="dropdown-item" name="flagSQ" href="#">S (Q)</a></li>
-                <li><a class="dropdown-item" name="flagSI" href="#">SIR</a></li>
-                <li><a class="dropdown-item" name="flagW" href="#">W</a></li>
-                <li><a class="dropdown-item" name="flagZ" href="#">Z</a></li>
-                <li><a class="dropdown-item" name="flag1" href="#">1</a></li>
-                <li><a class="dropdown-item" name="flag2" href="#">2</a></li>
-                <li><a class="dropdown-item" name="flag3" href="#">3</a></li>
-                <li><a class="dropdown-item" name="flag4" href="#">4</a></li>
-                <li><a class="dropdown-item" name="flag5" href="#">5</a></li>
-                <li><a class="dropdown-item" name="flag6" href="#">6</a></li>
-                <li><a class="dropdown-item" name="flag7" href="#">7</a></li>
-            </ul>
-        </div>
-    </div> -->
     <div id="info-panel">
         <button type="button" class="btn-close" onclick=closeinfo() aria-label="Close"></button>
         <div id="info-panel-text"></div>
