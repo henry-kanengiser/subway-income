@@ -119,7 +119,7 @@ function showLineData(feat) {
           <th style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller; text-align: right;"> Rank </th>
       </tr>
       <tr>
-          <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Median household income</b></td>
+          <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"><b>Median household income (2022 dollars)</b></td>
           <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
           <td style="border-bottom: 1px solid #292929; padding: 2px; font-size: smaller;"></td>
       </tr>
