@@ -127,7 +127,7 @@ stations_buffer <- st_buffer(stations_sf, dis = 2640)
 
 # check: do buffers look like the right size?
 tm_shape(stations_buffer) + 
-  tm_polygons()
+  tm_polygons(daytime)
 
 
 ## 2b. Census data manipulation ----
@@ -153,12 +153,28 @@ tract17_c <- st_centroid(tract17_2)
 
 # 3. Link census data to subway stations --------------------------------------
 
-# Intersect the station buffers layer with the 
-statbufftract22 <- stations_buffer %>%
+# Intersect the station buffers layer with the tract data
+statbufftract22_point <- stations_buffer %>%
   st_intersection(tract22_c)
 
-statbufftract17 <- stations_buffer %>%
+statbufftract17_point <- stations_buffer %>%
   st_intersection(tract17_c)
+
+# Intersect the station points with the tract polygons
+statbufftract22_poly <- stations_sf %>%
+  st_intersection(tract22_2)
+
+statbufftract17_poly <- stations_sf %>%
+  st_intersection(tract17_2)
+
+# Join these two intersections together and deduplicate based on geoid & station id
+statbufftract22 <- bind_rows(statbufftract22_point, statbufftract22_poly) %>%
+  # deduplicate if the same census tract is caught through both methods
+  distinct(gtfs_stop_id, geoid, .keep_all = T)
+
+statbufftract17 <- bind_rows(statbufftract17_point, statbufftract17_poly) %>%
+  # deduplicate if the same census tract is caught through both methods
+  distinct(gtfs_stop_id, geoid, .keep_all = T)
 
 ### Checks on this intersection ----
 ## How many stations are in the file?
@@ -175,7 +191,12 @@ intersected <- statbufftract22 %>%
 
 stations %>%
   st_drop_geometry() %>%
-  filter(!station_id %in% intersected)
+  filter(!station_id %in% intersected) %>%
+  View()
+
+### these tracts are very large, so none are within the buffer. instead we need
+###  to add the tracts that the station is within to ensure every station has
+###  at least one tract associated with it
 
 ## How many census tracts are in the file?
 statbufftract22 %>%
@@ -249,7 +270,6 @@ tract22_3 <- tract22_2 %>%
   filter(!st_is_empty(.)) %>%
   # replace NAs among flag vars that are outside the subway network
   mutate(across(starts_with("flag"), ~replace_na(.x, 0)))
-
 
 tract17_flags <- statbufftract17 %>%
   st_drop_geometry() %>%

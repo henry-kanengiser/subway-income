@@ -1,6 +1,5 @@
 // TO DO LIST
 // - Check underlying census tract data (seems to be missing for parts of SI and the 4 train)
-// - Add in datawrapper interactive figure of income & population by train line
 // - Reevaluate the 2017 data, is it really helpful? May want to just focus on 2022
 // - Hover popup for census tracts above a certain zoom that shows geoid, population, & income?
 
